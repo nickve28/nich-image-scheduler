@@ -1,16 +1,10 @@
 from flask import Flask, request, redirect
 import requests
-from dotenv import load_dotenv
 import os
 
-# Creates a spin off webserver to retrieve an access and refresh token for the first time, visit localhost:3000/login
+from write_tokens import write_tokens_to_file
 
-load_dotenv(
-    '.env',
-    None,
-    False,
-    True
-)
+# Creates a spin off webserver to retrieve an access and refresh token for the first time, visit localhost:3000/login
 
 app = Flask(__name__)
 
@@ -46,8 +40,8 @@ def callback():
     
     access_token = tokens['access_token']
     refresh_token = tokens['refresh_token']
-    os.environ[f'{ID}_ACCESS_TOKEN'] = access_token
-    os.environ[f'{ID}_REFRESH_TOKEN'] = access_token
+
+    write_tokens_to_file(ID, access_token, refresh_token)
     return f"Access Token: {access_token}<br>Refresh Token: {refresh_token}"
 
 if __name__ == '__main__':

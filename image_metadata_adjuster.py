@@ -22,6 +22,13 @@ class ImageMetadataAdjuster:
             self.exif = piexif.load(image.info['exif'])
         return self.exif
     
+    def get_caption(self) -> str:
+        exif = self.read_metadata()
+        caption = exif['0th'][piexif.ImageIFD.XPSubject]
+        if isinstance(caption, tuple):
+          caption = ''.join(chr(x) for x in caption[::2])
+        return caption     
+    
     def add_tags(self, tags):
         exif = self.read_metadata()
 

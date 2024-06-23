@@ -1,31 +1,40 @@
 import os
 import glob
-from dotenv import load_dotenv
+import sys
 import tkinter as tk
 from PIL import Image, ImageTk
 
-import clients.deviant
-import clients.twitter
 from image_metadata_adjuster import ImageMetadataAdjuster
-
-load_dotenv(
-    '.env',
-    None,
-    False,
-    True
-)
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 
 directory_path = os.getenv('DIRECTORY_PATH')
 extensions = os.getenv('EXTENSIONS').split(',')
 mode = os.getenv('MODE')
-time_frames = os.getenv('TIMEFRAMES').split(',')
 
 tag_mapping = {
     'Twitter': 'TWIT',
     'Deviant': 'DEVI'
 }
+tag = f'_{tag_mapping[mode]}_'
+
+def rename_file_with_tag(filepath):
+    # Split the file path into directory, filename, and extension
+    directory, basename = os.path.split(filepath)
+    filename, file_extension = os.path.splitext(basename)
+    
+    # Check if "_TWIT_" is already in the filename
+    if tag not in filename:
+        # Construct the new filename
+        new_filename = f"{filename}{tag}{file_extension}"
+        new_filepath = os.path.join(directory, new_filename)
+        
+        # Rename the file
+        os.rename(filepath, new_filepath)
+        print(f"Renamed {filepath} to {new_filepath}")
+    else:
+        print(f"{filepath} already contains '{tag}'")
+
 
 def find_images_in_folder(folder_path):
     image_paths = []
@@ -33,13 +42,6 @@ def find_images_in_folder(folder_path):
         print(os.path.join(folder_path, f'*{ext}'))
         image_paths.extend(glob.glob(os.path.join(folder_path, f'*{ext}')))
     return image_paths
-
-def schedule_post(image_path, caption):
-    json_path = f'#{os.path.splitext(image_path)[0]}.json'
-    if mode == 'Twitter':
-        clients.twitter.schedule(image_path, json_path, caption)
-    else:
-        clients.deviant.schedule(image_path, json_path, caption)
 
 def display_image_with_input(image_path):
     # Create a Tkinter window
@@ -80,17 +82,19 @@ def display_image_with_input(image_path):
     # Create an Entry widget for user input below the image
     input_field = tk.Entry(window)
     input_field.place(relx=0.5, rely=0.8, anchor=tk.CENTER, width=screen_width * 0.5)  # Centered and 50% of screen width
+    adjuster = ImageMetadataAdjuster(image_path)
+    caption = adjuster.get_caption()
+    if caption is not None:
+        input_field.insert(0, caption)
 
     # Function to handle user input
     def handle_input():
         user_input = input_field.get()
         print(f"User Input: {user_input}")
-        adjuster = ImageMetadataAdjuster(image_path)
-        adjuster.add_tags(tag_mapping[mode])
         adjuster.add_subject(user_input)
         adjuster.save()
+        rename_file_with_tag(image_path)
         window.destroy()
-        schedule_post(image_path, user_input)
     
     def handle_cancel():
         window.destroy()
