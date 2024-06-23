@@ -27,7 +27,7 @@ client = tweepy.Client(
     wait_on_rate_limit=True
 )
 
-tags = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls", "#AIgirls18" ]
+tags = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls" ]
 
 def schedule(image_path, json_path, caption):
     try:
@@ -35,7 +35,7 @@ def schedule(image_path, json_path, caption):
         media_id = old_client.media_upload(filename=image_path).media_id_string
         print(f'uploaded: {media_id}')
 
-        tweet_text = f"#{caption} #{" ".join(random.sample(tags, 2))}"
+        tweet_text = f"{caption} {" ".join(random.sample(tags, 2))}"
         print(f'tweeting: {tweet_text}')
         response = client.create_tweet(text=tweet_text, media_ids=[media_id])
 

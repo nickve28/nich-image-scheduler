@@ -16,24 +16,25 @@ tag_mapping = {
     'Twitter': 'TWIT',
     'Deviant': 'DEVI'
 }
-tag = f'_{tag_mapping[mode]}_'
+tag = tag_mapping[mode]
 
 def rename_file_with_tag(filepath):
     # Split the file path into directory, filename, and extension
     directory, basename = os.path.split(filepath)
     filename, file_extension = os.path.splitext(basename)
+    queued_tag = f'_{tag}_Q_'
     
     # Check if "_TWIT_" is already in the filename
-    if tag not in filename:
+    if queued_tag not in filename:
         # Construct the new filename
-        new_filename = f"{filename}{tag}{file_extension}"
+        new_filename = f"{filename}{queued_tag}{file_extension}"
         new_filepath = os.path.join(directory, new_filename)
         
         # Rename the file
         os.rename(filepath, new_filepath)
         print(f"Renamed {filepath} to {new_filepath}")
     else:
-        print(f"{filepath} already contains '{tag}'")
+        print(f"{filepath} already contains '{queued_tag}'")
 
 
 def find_images_in_folder(folder_path):
