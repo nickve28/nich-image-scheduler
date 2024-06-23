@@ -1,5 +1,6 @@
 import os
 import glob
+import random
 import sys
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -65,6 +66,7 @@ def find_images_in_folder(folder_path):
         files = glob.glob(os.path.join(folder_path, f'*{ext}'))
         filtered_files = exclude_files(files)
         image_paths.extend(filtered_files)
+    random.shuffle(image_paths)
     return image_paths
 
 def display_image_with_input(image_path):
