@@ -6,3 +6,4 @@ refresh_token_cache
 bin/
 profiles/
 crontasks/
+.stfolder

@@ -100,3 +100,9 @@ python ./schedule_image.py
 
 A file will have the `_<TWIT|DEVI>_Q_` suffix if queued for said integration, or both (separate entries), or `_<TWIT|DEVI>_P_` if posted respectively. eg a file could be queued for devi and posted to twitter and be named
 `my_file_TWIT_P_DEVI_Q_.jpg`
+
+
+### Additional env vars
+
+export TWITTER_FONT_CURSIVE=1 # make font cursive
+export TWITTER_TAGS_BEFORE_CAPTION=1 # put tags before caption

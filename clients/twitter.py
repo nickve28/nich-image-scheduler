@@ -4,6 +4,8 @@ import random
 import sys
 import shutil
 
+from utils.text_utils import to_cursive
+
 directory_path = os.getenv('DIRECTORY_PATH')
 extensions = os.getenv('EXTENSIONS').split(',')
 mode = os.getenv('MODE')
@@ -15,6 +17,16 @@ ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
 tags = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls" ]
+
+def decorate_caption(caption):
+    make_cursive = os.getenv('TWITTER_FONT_CURSIVE', '0') == '1'
+    return to_cursive(caption) if make_cursive else caption
+
+def add_tags(caption):
+    combined_tags = " ".join(random.sample(tags, 2))
+    if os.getenv('TWITTER_TAGS_BEFORE_CAPTION', '0') == '1':
+      return f'{combined_tags} {caption}'
+    return f'{caption} {combined_tags}'
 
 def schedule(image_path, json_path, caption):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -31,27 +43,18 @@ def schedule(image_path, json_path, caption):
     )
 
     try:
-        print(f'uploading: {image_path}')
-        media_id = old_client.media_upload(filename=image_path).media_id_string
-        print(f'uploaded: {media_id}')
+        tweet_text = add_tags(decorate_caption(caption))
+        breakpoint()
+        # print(f'uploading: {image_path}')
+        # media_id = old_client.media_upload(filename=image_path).media_id_string
+        # print(f'uploaded: {media_id}')
 
-        tweet_text = f"{caption} {" ".join(random.sample(tags, 2))}"
-        print(f'tweeting: {tweet_text}')
-        response = client.create_tweet(text=tweet_text, media_ids=[media_id])
+        
+        # print(f'tweeting: {tweet_text}')
+        # response = client.create_tweet(text=tweet_text, media_ids=[media_id])
 
-        print(f'tweeted! response: {response}')
-        print(f'https://twitter.com/user/status/{response.data["id"]}')
-
-        # tweeted_dir = os.path.join(directory, "tweeted")
-        # if not os.path.exists(tweeted_dir):
-        #     os.makedirs(tweeted_dir)
-
-        # shutil.move(image_path, os.path.join(tweeted_dir, os.path.basename(image_path)))
-        # print(f'Moved {os.path.basename(image_path)} to {tweeted_dir}')
-
-        # if json_path:
-        #     shutil.move(json_path, os.path.join(tweeted_dir, os.path.basename(json_path)))
-        #     print(f'Moved {os.path.basename(json_path)} to {tweeted_dir}')
+        # print(f'tweeted! response: {response}')
+        # print(f'https://twitter.com/user/status/{response.data["id"]}')
 
     except tweepy.errors.TweepyException as e:
         print(f'Failed to tweet: {e}')
