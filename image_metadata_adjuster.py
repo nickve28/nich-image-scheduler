@@ -58,3 +58,6 @@ class ImageMetadataAdjuster:
     def save(self):
         image = self.image
         image.save(self.image_path, exif=piexif.dump(self.exif))
+
+    def close(self):
+        self.image = None

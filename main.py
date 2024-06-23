@@ -36,13 +36,34 @@ def rename_file_with_tag(filepath):
     else:
         print(f"{filepath} already contains '{queued_tag}'")
 
+def ban_file(filepath):
+    # Split the file path into directory, filename, and extension
+    directory, basename = os.path.split(filepath)
+    filename, file_extension = os.path.splitext(basename)
+    
+    # Construct the new filename
+    new_filename = f"{filename}_NO_{tag}_{file_extension}"
+    new_filepath = os.path.join(directory, new_filename)
+    
+    # Rename the file
+    os.rename(filepath, new_filepath)
+    print(f"Renamed {filepath} to {new_filepath}")
+
+def already_posted(file):
+    return f'{tag}_P_' in file
+
+def excluded_file(file):
+    return f'_NO_{tag}_' in file
+
+def exclude_files(files):
+    return [f for f in files if not (already_posted(f) or excluded_file(f))]
 
 def find_images_in_folder(folder_path):
     image_paths = []
     for ext in extensions:
         print(os.path.join(folder_path, f'*{ext}'))
         files = glob.glob(os.path.join(folder_path, f'*{ext}'))
-        filtered_files = [f for f in files if not f.endswith(f'{tag}_P_' + ext)]
+        filtered_files = exclude_files(files)
         image_paths.extend(filtered_files)
     return image_paths
 
@@ -100,6 +121,12 @@ def display_image_with_input(image_path):
         window.destroy()
     
     def handle_cancel():
+        adjuster.close()
+        window.destroy()
+
+    def handle_exclude():
+        adjuster.close()
+        ban_file(image_path)
         window.destroy()
 
     # Button to submit the input
@@ -108,6 +135,9 @@ def display_image_with_input(image_path):
 
     cancel_button = tk.Button(window, text="Cancel", command=handle_cancel)
     cancel_button.place(relx=0.5, rely=0.88, anchor=tk.CENTER)  # Centered below the input field
+
+    exclude_button = tk.Button(window, text="Exclude", command=handle_exclude)
+    exclude_button.place(relx=0.5, rely=0.91, anchor=tk.CENTER)  # Centered below the input field
 
     # Start the Tkinter main loop
     window.mainloop()
