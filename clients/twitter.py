@@ -17,6 +17,8 @@ ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
 tags = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls" ]
+if os.getenv('TWITTER_TAGS') is not None:
+    tags = os.getenv('TWITTER_TAGS').split(",")
 
 def decorate_caption(caption):
     make_cursive = os.getenv('TWITTER_FONT_CURSIVE', '0') == '1'
@@ -44,17 +46,16 @@ def schedule(image_path, json_path, caption):
 
     try:
         tweet_text = add_tags(decorate_caption(caption))
-        breakpoint()
-        # print(f'uploading: {image_path}')
-        # media_id = old_client.media_upload(filename=image_path).media_id_string
-        # print(f'uploaded: {media_id}')
+        print(f'uploading: {image_path}')
+        media_id = old_client.media_upload(filename=image_path).media_id_string
+        print(f'uploaded: {media_id}')
 
         
-        # print(f'tweeting: {tweet_text}')
-        # response = client.create_tweet(text=tweet_text, media_ids=[media_id])
+        print(f'tweeting: {tweet_text}')
+        response = client.create_tweet(text=tweet_text, media_ids=[media_id])
 
-        # print(f'tweeted! response: {response}')
-        # print(f'https://twitter.com/user/status/{response.data["id"]}')
+        print(f'tweeted! response: {response}')
+        print(f'https://twitter.com/user/status/{response.data["id"]}')
 
     except tweepy.errors.TweepyException as e:
         print(f'Failed to tweet: {e}')
