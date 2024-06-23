@@ -24,6 +24,8 @@ class ImageMetadataAdjuster:
     
     def get_caption(self) -> str:
         exif = self.read_metadata()
+        if piexif.ImageIFD.XPSubject not in exif['0th']:
+            return ""
         caption = exif['0th'][piexif.ImageIFD.XPSubject]
         if isinstance(caption, tuple):
           caption = ''.join(chr(x) for x in caption[::2])
