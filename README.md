@@ -106,3 +106,4 @@ A file will have the `_<TWIT|DEVI>_Q_` suffix if queued for said integration, or
 
 export TWITTER_FONT_CURSIVE=1 # make font cursive
 export TWITTER_TAGS_BEFORE_CAPTION=1 # put tags before caption
+export TWITTER_TAGS="#abc,#def" # comma separated list of tags, to override the defaults
