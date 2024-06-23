@@ -56,27 +56,3 @@ class ImageMetadataAdjuster:
     def save(self):
         image = self.image
         image.save(self.image_path, exif=piexif.dump(self.exif))
-
-    def print_metadata(self):
-        exif_data = self.read_metadata()
-    
-        for ifd_name in exif_data:
-            print(f"\n{ifd_name}:")
-            if exif_data[ifd_name] is not None:
-                for tag in exif_data[ifd_name]:
-                    tag_name = piexif.TAGS[ifd_name][tag]["name"]
-                    value = exif_data[ifd_name][tag]
-
-                    # Special handling for UserComment
-                    if tag_name == "UserComment" and isinstance(value, bytes):
-                        value = self.decode_user_comment(value)
-                    print(f"    {tag_name}: {value}")
-
-if __name__ == '__main__':
-    image_path = input("Please provide an image path")
-    adjuster = ImageMetadataAdjuster(image_path)
-    adjuster.add_tags("TAG")
-    # adjuster.add_subject("test")
-    adjuster.save()
-    adjuster.print_metadata()
-    

@@ -24,7 +24,7 @@ def rename_file_with_tag(filepath):
     filename, file_extension = os.path.splitext(basename)
     queued_tag = f'_{tag}_Q_'
     
-    # Check if "_TWIT_" is already in the filename
+    # Check if tag is already in the filename
     if queued_tag not in filename:
         # Construct the new filename
         new_filename = f"{filename}{queued_tag}{file_extension}"
@@ -41,7 +41,9 @@ def find_images_in_folder(folder_path):
     image_paths = []
     for ext in extensions:
         print(os.path.join(folder_path, f'*{ext}'))
-        image_paths.extend(glob.glob(os.path.join(folder_path, f'*{ext}')))
+        files = glob.glob(os.path.join(folder_path, f'*{ext}'))
+        filtered_files = [f for f in files if not f.endswith(f'{tag}_P_' + ext)]
+        image_paths.extend(filtered_files)
     return image_paths
 
 def display_image_with_input(image_path):

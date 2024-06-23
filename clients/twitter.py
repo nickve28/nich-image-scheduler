@@ -14,22 +14,22 @@ CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-old_client = tweepy.API(auth, wait_on_rate_limit=True)
-
-client = tweepy.Client(
-    BEARER_TOKEN,
-    CONSUMER_KEY,
-    CONSUMER_SECRET,
-    ACCESS_TOKEN,
-    ACCESS_TOKEN_SECRET,
-    wait_on_rate_limit=True
-)
-
 tags = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls" ]
 
 def schedule(image_path, json_path, caption):
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    old_client = tweepy.API(auth, wait_on_rate_limit=True)
+
+    client = tweepy.Client(
+        BEARER_TOKEN,
+        CONSUMER_KEY,
+        CONSUMER_SECRET,
+        ACCESS_TOKEN,
+        ACCESS_TOKEN_SECRET,
+        wait_on_rate_limit=True
+    )
+
     try:
         print(f'uploading: {image_path}')
         media_id = old_client.media_upload(filename=image_path).media_id_string
