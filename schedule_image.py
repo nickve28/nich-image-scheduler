@@ -57,3 +57,8 @@ if mode == 'Deviant':
     clients.deviant.schedule(file, "", caption)
 
 replace_file_tag(file)
+
+# image adjuster currently hold a file reference which blocks editing the name
+adjuster = ImageMetadataAdjuster(file)
+adjuster.add_tags(tag)
+adjuster.save()
