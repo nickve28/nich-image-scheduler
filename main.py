@@ -4,10 +4,28 @@ from dotenv import load_dotenv
 import tkinter as tk
 from PIL import Image, ImageTk
 
-load_dotenv()
+import clients.deviant
+import clients.twitter
+from image_metadata_adjuster import ImageMetadataAdjuster
+
+load_dotenv(
+    '.env',
+    None,
+    False,
+    True
+)
+
+CLIENT_ID = os.getenv('CLIENT_ID')
 
 directory_path = os.getenv('DIRECTORY_PATH')
 extensions = os.getenv('EXTENSIONS').split(',')
+mode = os.getenv('MODE')
+time_frames = os.getenv('TIMEFRAMES').split(',')
+
+tag_mapping = {
+    'Twitter': 'TWIT',
+    'Deviant': 'DEVI'
+}
 
 def find_images_in_folder(folder_path):
     image_paths = []
@@ -16,6 +34,12 @@ def find_images_in_folder(folder_path):
         image_paths.extend(glob.glob(os.path.join(folder_path, f'*{ext}')))
     return image_paths
 
+def schedule_post(image_path, caption):
+    json_path = f'#{os.path.splitext(image_path)[0]}.json'
+    if mode == 'Twitter':
+        clients.twitter.schedule(image_path, json_path, caption)
+    else:
+        clients.deviant.schedule(image_path, json_path, caption)
 
 def display_image_with_input(image_path):
     # Create a Tkinter window
@@ -23,14 +47,14 @@ def display_image_with_input(image_path):
     window.title("Image Window")
 
     # Load the image using PIL
-    image = Image.open(image_path)
+    original_image = Image.open(image_path)
     
     # Get the screen width and height
     screen_width = window.winfo_screenwidth()
     screen_height = window.winfo_screenheight()
 
     # Calculate the aspect ratio
-    image_width, image_height = image.size
+    image_width, image_height = original_image.size
     aspect_ratio = image_width / image_height
 
     # Calculate the window size to maintain aspect ratio and fit within screen
@@ -43,7 +67,7 @@ def display_image_with_input(image_path):
         new_width = int(new_height * aspect_ratio)
 
     # Resize the image to fit within the calculated size
-    image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    image = original_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
     photo = ImageTk.PhotoImage(image)
 
     # Set the window size to the screen size
@@ -61,10 +85,22 @@ def display_image_with_input(image_path):
     def handle_input():
         user_input = input_field.get()
         print(f"User Input: {user_input}")
+        adjuster = ImageMetadataAdjuster(image_path)
+        adjuster.add_tags(tag_mapping[mode])
+        adjuster.add_subject(user_input)
+        adjuster.save()
+        window.destroy()
+        schedule_post(image_path, user_input)
+    
+    def handle_cancel():
+        window.destroy()
 
     # Button to submit the input
     submit_button = tk.Button(window, text="Submit", command=handle_input)
     submit_button.place(relx=0.5, rely=0.85, anchor=tk.CENTER)  # Centered below the input field
+
+    cancel_button = tk.Button(window, text="Cancel", command=handle_cancel)
+    cancel_button.place(relx=0.5, rely=0.88, anchor=tk.CENTER)  # Centered below the input field
 
     # Start the Tkinter main loop
     window.mainloop()
