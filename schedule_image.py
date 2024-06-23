@@ -45,6 +45,7 @@ def replace_file_tag(filepath):
     # Rename the file
     os.rename(filepath, new_filepath)
     print(f"Renamed {filepath} to {new_filepath}")
+    return new_filepath
 
 file = find_random_image_in_folder(directory_path)
 
@@ -56,9 +57,9 @@ if mode == 'Twitter':
 if mode == 'Deviant':
     clients.deviant.schedule(file, "", caption)
 
-replace_file_tag(file)
+new_filepath = replace_file_tag(file)
 
 # image adjuster currently hold a file reference which blocks editing the name
-adjuster = ImageMetadataAdjuster(file)
+adjuster = ImageMetadataAdjuster(new_filepath)
 adjuster.add_tags(tag)
 adjuster.save()
