@@ -42,7 +42,7 @@ def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
     for platform, checked in platform_dict.items():
         # Check if tag is already in the filename
         queued_tag = QUEUE_TAG_MAPPING[platform]
-        print(checked, queued_tag, filename)
+
         if (not checked) and queued_tag in filename:
             new_filename_without_extension = new_filename_without_extension.replace(queued_tag, '')
         elif checked and queued_tag not in filename:
@@ -58,7 +58,6 @@ def exclude_files(files):
 def find_images_in_folder(folder_path):
     image_paths = []
     for ext in EXTENSIONS:
-        print(os.path.join(folder_path, f'*{ext}'))
         files = glob.glob(os.path.join(folder_path, f'*{ext}'))
         filtered_files = exclude_files(files)
         filtered_files = files
