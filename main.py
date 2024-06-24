@@ -212,7 +212,7 @@ class Scheduler(QMainWindow):
         self._image.setPixmap(QPixmap(image).scaledToHeight(900, Qt.SmoothTransformation))
 
         # change the caption
-        caption = ImageMetadataAdjuster(image).get_caption() or 'Enter caption here...'
+        caption = ImageMetadataAdjuster(image).get_caption() or ''
         self._caption.setText(caption)
 
         # todo, can probably be done more elegant with mapping dicts
