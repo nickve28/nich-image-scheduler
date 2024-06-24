@@ -4,11 +4,11 @@ import os
 from deviant_utils.write_tokens import write_tokens_to_file
 
 ID = os.getenv('ID')
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-DEVI_MATURE_CLASSIFICATION = os.getenv('DEVI_MATURE_CLASSIFICATION')
+CLIENT_ID = os.getenv('DEVIANT_CLIENT_ID')
+CLIENT_SECRET = os.getenv('DEVIANT_CLIENT_SECRET')
+DEVI_MATURE_CLASSIFICATION = os.getenv('DEVIANT_MATURE_CLASSIFICATION')
 
-REFRESH_TOKEN = os.getenv('REFRESH_TOKEN')
+REFRESH_TOKEN = os.getenv('DEVIANT_REFRESH_TOKEN')
 
 def obtain_access_token():
     # Token endpoint URL

@@ -7,17 +7,12 @@ class ImageMetadataAdjuster:
         self.image = None
         self.exif = None
 
-    def get_image(self) -> Image:
-        if not self.image:
-            self.image = Image.open(self.image_path)
-        return self.image
-    
     def decode_user_comment(self, comment_bytes):
         # for now this is ok, all our content is utf-8
         return comment_bytes.decode('utf-8')
 
     def read_metadata(self) -> hash:
-        image = self.get_image()
+        image = Image.open(self.image_path)
         if not self.exif:
             self.exif = piexif.load(image.info['exif'])
         return self.exif
@@ -56,8 +51,6 @@ class ImageMetadataAdjuster:
         self.exif = exif
 
     def save(self):
-        image = self.image
+        image = Image.open(self.image_path)
         image.save(self.image_path, exif=piexif.dump(self.exif))
 
-    def close(self):
-        self.image = None

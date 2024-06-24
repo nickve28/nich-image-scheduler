@@ -8,13 +8,12 @@ from utils.text_utils import to_cursive
 
 directory_path = os.getenv('DIRECTORY_PATH')
 extensions = os.getenv('EXTENSIONS').split(',')
-mode = os.getenv('MODE')
 
-BEARER_TOKEN = os.getenv('BEARER_TOKEN')
-CONSUMER_KEY = os.getenv('CONSUMER_KEY')
-CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
-ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
+BEARER_TOKEN = os.getenv('TWITTER_BEARER_TOKEN')
+CONSUMER_KEY = os.getenv('TWITTER_CONSUMER_KEY')
+CONSUMER_SECRET = os.getenv('TWITTER_CONSUMER_SECRET')
+ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = os.getenv('TWITTER_ACCESS_TOKEN_SECRET')
 
 tags = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls" ]
 if os.getenv('TWITTER_TAGS') is not None:
