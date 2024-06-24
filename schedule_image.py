@@ -19,8 +19,8 @@ tag_mapping = {
 }
 
 tag = tag_mapping[mode]
-queued_tag = f'_{tag}_Q_'
-posted_tag = f'_{tag}_P_'
+queued_tag = f'_{tag}_Q'
+posted_tag = f'_{tag}_P'
 
 def find_random_image_in_folder(folder_path):
     image_paths = []
