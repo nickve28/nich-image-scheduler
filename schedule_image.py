@@ -51,15 +51,22 @@ file = find_random_image_in_folder(directory_path)
 
 caption = ImageMetadataAdjuster(file).get_caption()
 
-if mode == 'Twitter':
-    clients.twitter.schedule(file, "", caption)
+def run():
+    if mode == 'Twitter':
+        return clients.twitter.schedule(file, "", caption)
 
-if mode == 'Deviant':
-    clients.deviant.schedule(file, "", caption)
+    if mode == 'Deviant':
+        return clients.deviant.schedule(file, "", caption)
+    
+    print(f"Mode {mode} not recognized")
+    return False
 
-new_filepath = replace_file_tag(file)
+if run() == True:
+    new_filepath = replace_file_tag(file)
 
-# image adjuster currently hold a file reference which blocks editing the name
-adjuster = ImageMetadataAdjuster(new_filepath)
-adjuster.add_tags(tag)
-adjuster.save()
+    # image adjuster currently hold a file reference which blocks editing the name
+    adjuster = ImageMetadataAdjuster(new_filepath)
+    adjuster.add_tags(tag)
+    adjuster.save()
+else:
+    print(f"Upload failed. Halted on {file}")

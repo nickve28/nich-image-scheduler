@@ -55,6 +55,8 @@ def schedule(image_path, json_path, caption):
 
         print(f'tweeted! response: {response}')
         print(f'https://twitter.com/user/status/{response.data["id"]}')
+        return True
 
     except tweepy.errors.TweepyException as e:
         print(f'Failed to tweet: {e}')
+        return False

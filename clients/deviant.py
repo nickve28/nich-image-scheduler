@@ -38,38 +38,42 @@ def obtain_access_token():
     return new_access_token
 
 def schedule(image_path, json_path, caption):
-    access_token = obtain_access_token()
-    print(f"Authenticated {access_token}")
-    upload_url = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
+    try:
+        access_token = obtain_access_token()
+        print(f"Authenticated {access_token}")
+        upload_url = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
+        headers = {
+            "Authorization": f"Bearer {access_token}"
+        }
 
-    files = {
-        "file": open(image_path, "rb")
-    }
-    data = {
-        "title": caption,
-        "artist_comments": "",
-        "mature_content": "false" if os.getenv('NSFW', '1') == '0' else "true",
-        "ai_content": "true"
-    }
-    response = requests.post(upload_url, headers=headers, files=files, data=data)
-    json = response.json()
-    print("Upload response", json)
-    # {'status': 'success', 'itemid': ---, 'stack': 'Sta.sh Uploads 90', 'stackid': ---}
-    
-    submit_url = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
-    publish_data = {
-        "itemid": json['itemid'],
-        "title": caption,
-        "artist_comments": "",
-        "is_mature": "false" if os.getenv('NSFW', '1') == '0' else "true",
-        "is_ai_generated": "true",
-        "mature_classification": DEVI_MATURE_CLASSIFICATION,
-        "tags": "",
-    }
-    response = requests.post(submit_url, headers=headers, data=publish_data)
-    submit_response = response.json()
-    print("Submit response", submit_response)
-    return json
+        files = {
+            "file": open(image_path, "rb")
+        }
+        data = {
+            "title": caption,
+            "artist_comments": "",
+            "mature_content": "false" if os.getenv('NSFW', '1') == '0' else "true",
+            "ai_content": "true"
+        }
+        response = requests.post(upload_url, headers=headers, files=files, data=data)
+        json = response.json()
+        print("Upload response", json)
+        # {'status': 'success', 'itemid': ---, 'stack': 'Sta.sh Uploads 90', 'stackid': ---}
+        
+        submit_url = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
+        publish_data = {
+            "itemid": json['itemid'],
+            "title": caption,
+            "artist_comments": "",
+            "is_mature": "false" if os.getenv('NSFW', '1') == '0' else "true",
+            "is_ai_generated": "true",
+            "mature_classification": DEVI_MATURE_CLASSIFICATION,
+            "tags": "",
+        }
+        response = requests.post(submit_url, headers=headers, data=publish_data)
+        submit_response = response.json()
+        print("Submit response", submit_response)
+        return True
+    except Exception as e:
+        print(f"Error while attempting to upload to Deviant: {e}")
+        return False
