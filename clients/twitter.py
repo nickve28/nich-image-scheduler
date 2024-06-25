@@ -1,31 +1,28 @@
 import tweepy
-import os
 import random
-import sys
-import shutil
 
 from utils.text_utils import to_cursive
+from utils.account import TWITTER_DATA
 
-directory_path = os.getenv('DIRECTORY_PATH')
-extensions = os.getenv('EXTENSIONS').split(',')
+BEARER_TOKEN = TWITTER_DATA['bearer_token']
+CONSUMER_KEY = TWITTER_DATA['consumer_key']
+CONSUMER_SECRET = TWITTER_DATA['consumer_secret']
+ACCESS_TOKEN = TWITTER_DATA['access_token']
+ACCESS_TOKEN_SECRET = TWITTER_DATA['access_token_secret']
 
-BEARER_TOKEN = os.getenv('TWITTER_BEARER_TOKEN')
-CONSUMER_KEY = os.getenv('TWITTER_CONSUMER_KEY')
-CONSUMER_SECRET = os.getenv('TWITTER_CONSUMER_SECRET')
-ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = os.getenv('TWITTER_ACCESS_TOKEN_SECRET')
-
-tags = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls" ]
-if os.getenv('TWITTER_TAGS') is not None:
-    tags = os.getenv('TWITTER_TAGS').split(",")
+DEFAULT_TAGS = [ "#AIart", "#AIイラスト", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks", "#AIgirls" ]
+DEFAULT_TAG_COUNT = 2
+tags = TWITTER_DATA.get('tags', DEFAULT_TAGS)
+tag_count = TWITTER_DATA.get('tag_count', DEFAULT_TAG_COUNT)
+tags_before_caption = TWITTER_DATA.get('tag_position', 'append') == 'prepend'
 
 def decorate_caption(caption):
-    make_cursive = os.getenv('TWITTER_FONT_CURSIVE', '0') == '1'
+    make_cursive = TWITTER_DATA.get('cursive_font', False) is True
     return to_cursive(caption) if make_cursive else caption
 
 def add_tags(caption):
-    combined_tags = " ".join(random.sample(tags, 2))
-    if os.getenv('TWITTER_TAGS_BEFORE_CAPTION', '0') == '1':
+    combined_tags = " ".join(random.sample(tags, tag_count))
+    if tags_before_caption:
       return f'{combined_tags} {caption}'
     return f'{caption} {combined_tags}'
 

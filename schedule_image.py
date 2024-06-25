@@ -1,17 +1,17 @@
 import os
 import glob
 import random
-import sys
-import tkinter as tk
-from PIL import Image, ImageTk
 
 import clients.deviant
 import clients.twitter
-from image_metadata_adjuster import ImageMetadataAdjuster
+from utils.image_metadata_adjuster import ImageMetadataAdjuster
+from utils.account import DIRECTORY_PATH, EXTENSIONS, PLATFORMS
 
-directory_path = os.getenv('DIRECTORY_PATH')
-extensions = os.getenv('EXTENSIONS').split(',')
 mode = os.getenv('MODE')
+
+if mode is None or mode not in PLATFORMS:
+    err = f"Please provide an env var MODE= with one of: {list(PLATFORMS)}"
+    raise RuntimeError(err)
 
 tag_mapping = {
     'Twitter': 'TWIT',
@@ -25,7 +25,7 @@ posted_tag = f'_{tag}_P'
 def find_random_image_in_folder(folder_path):
     image_paths = []
 
-    for ext in extensions:
+    for ext in EXTENSIONS:
         file_with_ext = f'*{queued_tag}*{ext}'
         print(os.path.join(folder_path, file_with_ext))
         image_paths.extend(glob.glob(os.path.join(folder_path, file_with_ext)))
@@ -47,7 +47,7 @@ def replace_file_tag(filepath):
     print(f"Renamed {filepath} to {new_filepath}")
     return new_filepath
 
-file = find_random_image_in_folder(directory_path)
+file = find_random_image_in_folder(DIRECTORY_PATH)
 
 caption = ImageMetadataAdjuster(file).get_caption()
 

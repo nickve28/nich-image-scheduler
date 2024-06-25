@@ -1,0 +1,36 @@
+my_account:
+  version: 1
+  id: my_account
+  directory_path: /my-pictures/**/posted
+  extensions:
+    - jpg
+    - jpeg
+  platforms:
+    - Twitter
+    - Deviant
+  nsfw: 1
+  twitter:
+    consumer_key: t123
+    consumer_secret: t456
+    bearer_token: AAAAAAAAAAAAAAAAAAAAA
+    access_token: t111
+    access_token_secret: t222
+    client_id: t21
+    client_secret: t22
+    cursive_font: true
+    tag_position: "prepend" # "append", default: "append"
+    tag_count: 2 # default: 2
+    tags: # optional, app contains a default
+      - "#AIart"
+      - "#AIイラスト"
+      - "#AIArtwork"
+      - "#AIArtCommunity"
+      - "#AIArtGallery"
+      - "#AIArtworks"
+  deviant:
+    client_id: 123
+    client_secret: 456
+    default_mature_classification: "" # optional
+    galleries:
+      featured: Featured
+      "123": My Galleria

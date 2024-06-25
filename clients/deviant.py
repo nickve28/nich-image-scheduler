@@ -1,15 +1,14 @@
 import requests
 import os
 
-from deviant_utils.write_tokens import write_tokens_to_file
+from deviant_utils.deviant_refresh_token import write_token_to_file
 from deviant_utils.pick_resolution import get_optimal_resolution
+from utils.account import ACCOUNT, DEVIANT_DATA
 
-ID = os.getenv('ID')
-CLIENT_ID = os.getenv('DEVIANT_CLIENT_ID')
-CLIENT_SECRET = os.getenv('DEVIANT_CLIENT_SECRET')
-DEVI_MATURE_CLASSIFICATION = os.getenv('DEVIANT_MATURE_CLASSIFICATION')
-
-REFRESH_TOKEN = os.getenv('DEVIANT_REFRESH_TOKEN')
+CLIENT_ID = DEVIANT_DATA['client_id']
+CLIENT_SECRET = DEVIANT_DATA['client_secret']
+DEVI_MATURE_CLASSIFICATION = DEVIANT_DATA.get('default_mature_classification', None)
+REFRESH_TOKEN = DEVIANT_DATA['refresh_token']
 
 def obtain_access_token():
     # Token endpoint URL
@@ -34,13 +33,15 @@ def obtain_access_token():
     print("Received new tokens")
     print("Access token", new_access_token)
     print("Refresh token", new_refresh_token)
-    write_tokens_to_file(ID, new_access_token, new_refresh_token)
+    write_token_to_file(ACCOUNT, new_refresh_token)
 
     return new_access_token
 
 def schedule(image_path, json_path, caption):
     try:
         access_token = obtain_access_token()
+        breakpoint()
+        raise RuntimeError("rollback")
         print(f"Authenticated {access_token}")
         upload_url = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
         headers = {

@@ -1,11 +1,7 @@
 import os
 import glob
 
-ID = os.getenv("ID")
-DIRECTORY_PATH = os.getenv('DIRECTORY_PATH')
-EXTENSIONS = os.getenv('EXTENSIONS').split(',')
-
-PLATFORMS = os.getenv('PLATFORMS', '').split(',')
+from utils.account import ID, DIRECTORY_PATH, EXTENSIONS, PLATFORMS
 
 print(f"Checking queues for account {ID}")
 print("\n")

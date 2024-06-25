@@ -8,3 +8,4 @@ profiles/
 crontasks/
 .stfolder
 .stignore
+accounts.yml

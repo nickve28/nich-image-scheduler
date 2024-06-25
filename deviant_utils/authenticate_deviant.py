@@ -2,19 +2,18 @@ from flask import Flask, request, redirect
 import requests
 import os
 
-from write_tokens import write_tokens_to_file
+from utils.account import DEVIANT_DATA, ACCOUNT
+from deviant_utils.deviant_refresh_token import write_token_to_file
 
 # Creates a spin off webserver to retrieve an access and refresh token for the first time, visit localhost:3000/login
 
 app = Flask(__name__)
 
-CLIENT_ID = os.getenv('DEVIANT_CLIENT_ID')
-CLIENT_SECRET = os.getenv('DEVIANT_CLIENT_SECRET')
-PORT = os.getenv('DEVI_SERVER_PORT')
-REDIRECT_URI = f'http://localhost:{PORT}/deviantart/callback'
+CLIENT_ID = DEVIANT_DATA['client_id']
+CLIENT_SECRET = DEVIANT_DATA['client_secret']
+PORT = 3000
+REDIRECT_URI = f"http://localhost:{PORT}/deviantart/callback"
 SCOPE='stash publish'
-
-ID = os.getenv('ID')
 
 @app.route('/login')
 def login():
@@ -41,7 +40,7 @@ def callback():
     access_token = tokens['access_token']
     refresh_token = tokens['refresh_token']
 
-    write_tokens_to_file(ID, access_token, refresh_token)
+    write_token_to_file(ACCOUNT, refresh_token)
     return f"Access Token: {access_token}<br>Refresh Token: {refresh_token}"
 
 if __name__ == '__main__':

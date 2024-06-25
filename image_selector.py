@@ -7,16 +7,12 @@ from typing import Dict
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QPushButton, QLabel, QHBoxLayout, QVBoxLayout, QScrollArea, QCheckBox,
-    QMessageBox, QApplication, QLineEdit, QSizePolicy
+    QApplication, QLineEdit, QSizePolicy
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap
 
-from image_metadata_adjuster import ImageMetadataAdjuster
-
-DIRECTORY_PATH = os.getenv('DIRECTORY_PATH')
-EXTENSIONS = os.getenv('EXTENSIONS').split(',')
-MODE = os.getenv('MODE')
-PLATFORMS = os.getenv('PLATFORMS', '').split(',')
+from utils.image_metadata_adjuster import ImageMetadataAdjuster
+from utils.account import DIRECTORY_PATH, EXTENSIONS, PLATFORMS
 
 TWIT_POSTED = '_TWIT_P'
 TWIT_QUEUED = '_TWIT_Q'
@@ -46,7 +42,7 @@ def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
         if (not checked) and queued_tag in filename:
             new_filename_without_extension = new_filename_without_extension.replace(queued_tag, '')
         elif checked and queued_tag not in filename:
-            new_filename_without_extension = f"{filename}{queued_tag}"
+            new_filename_without_extension = f"{new_filename_without_extension}{queued_tag}"
     new_filepath = os.path.join(directory, f"{new_filename_without_extension}{file_extension}")
     print(f"Renaming {filepath} to {new_filepath}")
     os.rename(filepath, new_filepath)
