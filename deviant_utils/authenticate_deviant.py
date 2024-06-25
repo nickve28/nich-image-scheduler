@@ -8,8 +8,8 @@ from write_tokens import write_tokens_to_file
 
 app = Flask(__name__)
 
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+CLIENT_ID = os.getenv('DEVIANT_CLIENT_ID')
+CLIENT_SECRET = os.getenv('DEVIANT_CLIENT_SECRET')
 PORT = os.getenv('DEVI_SERVER_PORT')
 REDIRECT_URI = f'http://localhost:{PORT}/deviantart/callback'
 SCOPE='stash publish'
@@ -37,7 +37,7 @@ def callback():
     }
     response = requests.post(token_url, headers=headers, data=data)
     tokens = response.json()
-    
+
     access_token = tokens['access_token']
     refresh_token = tokens['refresh_token']
 
