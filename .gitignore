@@ -7,3 +7,4 @@ bin/
 profiles/
 crontasks/
 .stfolder
+.stignore

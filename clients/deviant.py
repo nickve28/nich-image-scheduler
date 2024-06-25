@@ -53,7 +53,7 @@ def schedule(image_path, json_path, caption):
             "title": caption,
             "artist_comments": "",
             "mature_content": "false" if os.getenv('NSFW', '1') == '0' else "true",
-            "ai_content": "true"
+            "is_ai_generated": "true"
         }
         response = requests.post(upload_url, headers=headers, files=files, data=data)
         json = response.json()

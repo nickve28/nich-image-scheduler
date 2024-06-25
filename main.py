@@ -53,6 +53,7 @@ def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
     return new_filepath
 
 def exclude_files(files):
+    # todo only filter active platforms
     return [f for f in files if (TWIT_POSTED not in f) and (DEVI_POSTED not in f)]
 
 def find_images_in_folder(folder_path):
