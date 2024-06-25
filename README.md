@@ -15,7 +15,7 @@ Each account needs a profile like this. An account can span multiple platforms
 export ID=nick
 export DIRECTORY_PATH=E:\\stable-diffusion-pics\\nsfw\\**\\posted
 export EXTENSIONS=.jpeg,.jpg
-export NSFW=1
+export NSFW=0
 
 export TWITTER_CONSUMER_KEY=12
 export TWITTER_CONSUMER_SECRET=23

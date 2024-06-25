@@ -60,7 +60,6 @@ def find_images_in_folder(folder_path):
     for ext in EXTENSIONS:
         files = glob.glob(os.path.join(folder_path, f'*{ext}'))
         filtered_files = exclude_files(files)
-        filtered_files = files
         image_paths.extend(filtered_files)
     random.shuffle(image_paths)
     return image_paths
