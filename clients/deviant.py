@@ -40,8 +40,6 @@ def obtain_access_token():
 def schedule(image_path, json_path, caption):
     try:
         access_token = obtain_access_token()
-        breakpoint()
-        raise RuntimeError("rollback")
         print(f"Authenticated {access_token}")
         upload_url = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
         headers = {
