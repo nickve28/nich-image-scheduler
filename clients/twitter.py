@@ -49,7 +49,6 @@ def schedule(image_path, json_path, caption):
         media_id = old_client.media_upload(filename=image_path).media_id_string
         print(f'uploaded: {media_id}')
 
-        
         print(f'tweeting: {tweet_text}')
         response = client.create_tweet(text=tweet_text, media_ids=[media_id])
 

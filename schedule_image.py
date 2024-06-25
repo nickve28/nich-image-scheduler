@@ -24,7 +24,7 @@ posted_tag = f'_{tag}_P'
 
 def find_random_image_in_folder(folder_path):
     image_paths = []
-    
+
     for ext in extensions:
         file_with_ext = f'*{queued_tag}*{ext}'
         print(os.path.join(folder_path, file_with_ext))
@@ -35,13 +35,13 @@ def replace_file_tag(filepath):
     # Split the file path into directory, filename, and extension
     directory, basename = os.path.split(filepath)
     filename, file_extension = os.path.splitext(basename)
-    
+
     # Construct the new filename
     new_name = filename.replace(queued_tag, posted_tag)
     new_filename = f'{new_name}{file_extension}'
 
     new_filepath = os.path.join(directory, new_filename)
-    
+
     # Rename the file
     os.rename(filepath, new_filepath)
     print(f"Renamed {filepath} to {new_filepath}")
@@ -57,7 +57,7 @@ def run():
 
     if mode == 'Deviant':
         return clients.deviant.schedule(file, "", caption)
-    
+
     print(f"Mode {mode} not recognized")
     return False
 

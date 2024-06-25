@@ -16,7 +16,7 @@ class ImageMetadataAdjuster:
         if not self.exif:
             self.exif = piexif.load(image.info['exif'])
         return self.exif
-    
+
     def get_caption(self) -> str:
         exif = self.read_metadata()
         if piexif.ImageIFD.XPSubject not in exif['0th']:
@@ -24,18 +24,18 @@ class ImageMetadataAdjuster:
         caption = exif['0th'][piexif.ImageIFD.XPSubject]
         if isinstance(caption, tuple):
           caption = ''.join(chr(x) for x in caption[::2])
-        return caption     
-    
+        return caption
+
     def add_tags(self, tags):
         exif = self.read_metadata()
 
         if piexif.ImageIFD.XPKeywords not in exif['0th']:
             exif['0th'][piexif.ImageIFD.XPKeywords] = ''
-  
+
         current_keywords = exif['0th'][piexif.ImageIFD.XPKeywords]
         if isinstance(current_keywords, tuple):
           current_keywords = ''.join(chr(x) for x in current_keywords[::2])
-        
+
         merged_keywords = current_keywords
         if merged_keywords != '':
             merged_keywords += ';'
