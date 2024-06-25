@@ -37,7 +37,7 @@ def callback():
     }
     response = requests.post(token_url, headers=headers, data=data)
     tokens = response.json()
-    
+
     access_token = tokens['access_token']
     refresh_token = tokens['refresh_token']
 

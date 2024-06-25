@@ -233,7 +233,7 @@ class Scheduler(QMainWindow):
 
     def submit_callback(self) -> None:
         caption = self._caption.text()
-        adjuster = ImageMetadataAdjuster(self._current_image) 
+        adjuster = ImageMetadataAdjuster(self._current_image)
         adjuster.add_subject(caption)
         adjuster.save()
         platforms = dict([[checkbox.text(), checkbox.isChecked()] for checkbox in self._target_checkboxes])
@@ -241,7 +241,7 @@ class Scheduler(QMainWindow):
 
         # Make sure the name is updated for subsequent saves
         self._current_image = new_filename
-        self._images[self._current_index] = new_filename 
+        self._images[self._current_index] = new_filename
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -2,6 +2,7 @@ import requests
 import os
 
 from deviant_utils.write_tokens import write_tokens_to_file
+from deviant_utils.pick_resolution import get_optimal_resolution
 
 ID = os.getenv('ID')
 CLIENT_ID = os.getenv('DEVIANT_CLIENT_ID')
@@ -21,7 +22,7 @@ def obtain_access_token():
         'refresh_token': REFRESH_TOKEN
     }
     print(data)
- 
+
     response = requests.post(token_url, data=data)
 
     # Parse response JSON
@@ -59,7 +60,7 @@ def schedule(image_path, json_path, caption):
         json = response.json()
         print("Upload response", json)
         # {'status': 'success', 'itemid': ---, 'stack': 'Sta.sh Uploads 90', 'stackid': ---}
-        
+
         submit_url = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
         publish_data = {
             "itemid": json['itemid'],
@@ -67,7 +68,9 @@ def schedule(image_path, json_path, caption):
             "artist_comments": "",
             "is_mature": "false" if os.getenv('NSFW', '1') == '0' else "true",
             "is_ai_generated": "true",
-            "mature_classification": DEVI_MATURE_CLASSIFICATION,
+            "allow_free_download": "false",
+            "display_resolution": get_optimal_resolution(image_path),
+            # "mature_classification": DEVI_MATURE_CLASSIFICATION,
             "tags": "",
         }
         response = requests.post(submit_url, headers=headers, data=publish_data)
