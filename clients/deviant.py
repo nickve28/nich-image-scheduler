@@ -2,18 +2,18 @@ import requests
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
 
-class DeviantClient():
+
+class DeviantClient:
     def __init__(self, account_id, config):
         self.account_id = account_id
         self.config = config
 
-
     def _obtain_access_token(self):
         # Token endpoint URL
-        config = self.config['id']
-        client_id = self.config['client_id']
-        client_secret = self.config['client_secret']
-        refresh_token = self.config['refresh_token']
+        config = self.config["id"]
+        client_id = self.config["client_id"]
+        client_secret = self.config["client_secret"]
+        refresh_token = self.config["refresh_token"]
         token_url = "https://www.deviantart.com/oauth2/token"
 
         data = {"grant_type": "refresh_token", "client_id": client_id, "client_secret": client_secret, "refresh_token": refresh_token}
@@ -34,9 +34,8 @@ class DeviantClient():
 
         return new_access_token
 
-
     def schedule(self, image_path, caption):
-        nsfw = self.config['nsfw']
+        nsfw = self.config["nsfw"]
         mature_content = "false" if nsfw is False else True
 
         try:

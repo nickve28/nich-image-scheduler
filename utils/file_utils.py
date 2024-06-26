@@ -18,7 +18,7 @@ def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
         queued_tag = QUEUE_TAG_MAPPING[platform]
 
         if (not checked) and queued_tag in filename:
-            new_filename_without_extension = new_filename_without_extension.replace(queued_tag, '')
+            new_filename_without_extension = new_filename_without_extension.replace(queued_tag, "")
         elif checked and queued_tag not in filename:
             new_filename_without_extension = f"{new_filename_without_extension}{queued_tag}"
     new_filepath = os.path.join(directory, f"{new_filename_without_extension}{file_extension}")
@@ -26,16 +26,18 @@ def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
     os.rename(filepath, new_filepath)
     return new_filepath
 
+
 def exclude_files(files):
     # todo only filter active platforms
     return [f for f in files if (TWIT_POSTED not in f) and (DEVI_POSTED not in f)]
+
 
 # Based on the provided glob path, and whitelisted extensions
 # Find the files matching said pattern
 def find_images_in_folder(folder_path, extensions):
     image_paths = []
     for ext in extensions:
-        files = glob.glob(os.path.join(folder_path, f'*{ext}'))
+        files = glob.glob(os.path.join(folder_path, f"*{ext}"))
         filtered_files = exclude_files(files)
         image_paths.extend(filtered_files)
     return image_paths

@@ -17,6 +17,7 @@ DEFAULT_TAGS = [
 DEFAULT_TAG_COUNT = 2
 PREPEND = "prepend"
 
+
 def decorate_caption(caption, opts):
     make_cursive = opts.get("cursive_font", False) is True
     return to_cursive(caption) if make_cursive else caption
@@ -29,22 +30,15 @@ def add_tags(caption, tags, tag_position, tag_count):
     return f"{caption} {combined_tags}"
 
 
-class TwitterClient():
+class TwitterClient:
     def __init__(self, config):
         self.config = config
-        self.tags = config.get('tags', DEFAULT_TAGS)
-        self.tag_count = config.get('tag_count', DEFAULT_TAG_COUNT)
+        self.tags = config.get("tags", DEFAULT_TAGS)
+        self.tag_count = config.get("tag_count", DEFAULT_TAG_COUNT)
         self.tag_position = config.get("tag_position", "append")
 
-
     def decorate_caption(self, caption):
-        return add_tags(
-            caption=decorate_caption(caption, self.config),
-            tags=self.tags,
-            tag_count=self.tag_count,
-            tag_position=self.tag_position
-        )
-
+        return add_tags(caption=decorate_caption(caption, self.config), tags=self.tags, tag_count=self.tag_count, tag_position=self.tag_position)
 
     def schedule(self, image_path, caption):
         config = self.config
@@ -69,24 +63,22 @@ class TwitterClient():
             print(f"Failed to tweet: {e}")
             return False
 
-
     def authenticate_media_api_client(self, config):
-        consumer_key = config['consumer_key']
-        consumer_secret = config['consumer_secret']
-        access_token = config['access_token']
-        access_token_secret = config['access_token_secret']
+        consumer_key = config["consumer_key"]
+        consumer_secret = config["consumer_secret"]
+        access_token = config["access_token"]
+        access_token_secret = config["access_token_secret"]
 
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         return tweepy.API(auth, wait_on_rate_limit=True)
 
-
     def authenticate_api_client(self, config):
-        bearer_token = config['bearer_token']
-        consumer_key = config['consumer_key']
-        consumer_secret = config['consumer_secret']
-        access_token = config['access_token']
-        access_token_secret = config['access_token_secret']
+        bearer_token = config["bearer_token"]
+        consumer_key = config["consumer_key"]
+        consumer_secret = config["consumer_secret"]
+        access_token = config["access_token"]
+        access_token_secret = config["access_token_secret"]
 
         return tweepy.Client(
             bearer_token,

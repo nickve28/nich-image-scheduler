@@ -6,8 +6,17 @@ from typing import Dict
 
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QPushButton, QLabel, QHBoxLayout, QVBoxLayout, QScrollArea, QCheckBox,
-    QApplication, QLineEdit, QSizePolicy
+    QMainWindow,
+    QWidget,
+    QPushButton,
+    QLabel,
+    QHBoxLayout,
+    QVBoxLayout,
+    QScrollArea,
+    QCheckBox,
+    QApplication,
+    QLineEdit,
+    QSizePolicy,
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap
 
@@ -21,9 +30,10 @@ from utils.account import select_account
 account = parse_arguments().account
 account_data = select_account(account)
 
-DIRECTORY_PATH = account_data['DIRECTORY_PATH']
-EXTENSIONS = account_data['EXTENSIONS']
-PLATFORMS = account_data['PLATFORMS']
+DIRECTORY_PATH = account_data["DIRECTORY_PATH"]
+EXTENSIONS = account_data["EXTENSIONS"]
+PLATFORMS = account_data["PLATFORMS"]
+
 
 class Scheduler(QMainWindow):
     def __init__(self):
@@ -31,7 +41,7 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: 'list[str]' = find_images_in_folder(DIRECTORY_PATH, EXTENSIONS)
+        self._images: "list[str]" = find_images_in_folder(DIRECTORY_PATH, EXTENSIONS)
         random.shuffle(self._images)
 
         if len(self._images) == 0:
@@ -61,10 +71,10 @@ class Scheduler(QMainWindow):
 
         # current caption
         self._caption = QLineEdit()
-        self._caption.setPlaceholderText('Enter a caption here...')
+        self._caption.setPlaceholderText("Enter a caption here...")
 
         # save
-        self._submit_button = QPushButton('Save')
+        self._submit_button = QPushButton("Save")
         self._submit_button.clicked.connect(self.submit_callback)
 
         # image selector
@@ -88,13 +98,13 @@ class Scheduler(QMainWindow):
         target_layout.setContentsMargins(0, 0, 0, 0)
 
         # create label
-        target_label = QLabel('Targets')
+        target_label = QLabel("Targets")
         target_label.setFixedHeight(20)
         target_layout.addWidget(target_label)
 
         # create checkboxes
         self._targets = PLATFORMS
-        self._target_checkboxes: 'list[QCheckBox]' = []
+        self._target_checkboxes: "list[QCheckBox]" = []
         for target in self._targets:
             checkbox = QCheckBox(target)
             checkbox.setFixedHeight(20)
@@ -177,7 +187,7 @@ class Scheduler(QMainWindow):
         self._image.setPixmap(QPixmap(image).scaledToHeight(900, Qt.SmoothTransformation))
 
         # change the caption
-        caption = ImageMetadataAdjuster(image).get_caption() or ''
+        caption = ImageMetadataAdjuster(image).get_caption() or ""
         self._caption.setText(caption)
 
         # todo, can probably be done more elegant with mapping dicts
@@ -188,13 +198,13 @@ class Scheduler(QMainWindow):
         queued_to_deviant = DEVI_QUEUED in image
 
         for checkbox in self._target_checkboxes:
-            if checkbox.text() == 'Twitter':
-              checkbox.setChecked((not posted_to_twitter) and queued_to_twitter)
-              checkbox.setEnabled(not posted_to_twitter)
+            if checkbox.text() == "Twitter":
+                checkbox.setChecked((not posted_to_twitter) and queued_to_twitter)
+                checkbox.setEnabled(not posted_to_twitter)
 
-            if checkbox.text() == 'Deviant':
-              checkbox.setChecked((not posted_to_deviant) and queued_to_deviant)
-              checkbox.setEnabled(not posted_to_deviant)
+            if checkbox.text() == "Deviant":
+                checkbox.setChecked((not posted_to_deviant) and queued_to_deviant)
+                checkbox.setEnabled(not posted_to_deviant)
 
     def submit_callback(self) -> None:
         caption = self._caption.text()
@@ -208,7 +218,8 @@ class Scheduler(QMainWindow):
         self._current_image = new_filename
         self._images[self._current_index] = new_filename
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = Scheduler()
     sys.exit(app.exec_())
