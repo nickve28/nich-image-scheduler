@@ -5,6 +5,7 @@ import random
 import clients.deviant
 import clients.twitter
 from utils.cli_args import parse_arguments
+from utils.constants import POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING, TAG_MAPPING
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account import select_account
 
@@ -22,11 +23,9 @@ if mode is None or mode not in platforms:
     err = f"Please provide a valid mode. Choices are: {list(platforms)}"
     raise ValueError(err)
 
-tag_mapping = {"Twitter": "TWIT", "Deviant": "DEVI"}
-
-tag = tag_mapping[mode]
-queued_tag = f"_{tag}_Q"
-posted_tag = f"_{tag}_P"
+tag = TAG_MAPPING[mode]
+queued_tag = QUEUE_TAG_MAPPING[mode]
+posted_tag = POSTED_TAG_MAPPING[mode]
 
 
 def find_random_image_in_folder(folder_path):
