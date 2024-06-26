@@ -4,8 +4,13 @@ import random
 
 import clients.deviant
 import clients.twitter
+from utils.cli_args import parse_arguments
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
-from utils.account import account_data, args
+from utils.account import select_account
+
+args = parse_arguments()
+account = args.account
+account_data = select_account(account)
 
 DIRECTORY_PATH = account_data['DIRECTORY_PATH']
 EXTENSIONS = account_data['EXTENSIONS']

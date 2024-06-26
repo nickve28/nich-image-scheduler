@@ -11,11 +11,15 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap
 
+from utils.cli_args import parse_arguments
 from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED
 from utils.file_utils import find_images_in_folder, rename_file_with_tags
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
-from utils.account import account_data
+from utils.account import select_account
 
+
+account = parse_arguments().account
+account_data = select_account(account)
 
 DIRECTORY_PATH = account_data['DIRECTORY_PATH']
 EXTENSIONS = account_data['EXTENSIONS']

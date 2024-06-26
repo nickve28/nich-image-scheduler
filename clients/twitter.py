@@ -1,8 +1,12 @@
 import tweepy
 import random
 
+from utils.cli_args import parse_arguments
 from utils.text_utils import to_cursive
-from utils.account import account_data
+from utils.account import select_account
+
+account = parse_arguments().account
+account_data = select_account(account)
 
 TWITTER_DATA = account_data['TWITTER_DATA']
 

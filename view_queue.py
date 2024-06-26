@@ -1,7 +1,11 @@
 import os
 import glob
 
-from utils.account import account_data, args
+from utils.account import select_account
+from utils.cli_args import parse_arguments
+
+account = parse_arguments().account
+account_data = select_account(account)
 
 # Use the account data based on the provided account name
 ID = account_data['ID']

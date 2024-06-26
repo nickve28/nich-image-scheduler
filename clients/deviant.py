@@ -3,10 +3,11 @@ import os
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
 from deviant_utils.pick_resolution import get_optimal_resolution
-from utils.account import account_data, args
+from utils.account import select_account
+from utils.cli_args import parse_arguments
 
-ACCOUNT = args.account
-DEVIANT_DATA = account_data['DEVIANT_DATA']
+ACCOUNT = parse_arguments().account
+DEVIANT_DATA = select_account(ACCOUNT)['DEVIANT_DATA']
 
 CLIENT_ID = DEVIANT_DATA['client_id']
 CLIENT_SECRET = DEVIANT_DATA['client_secret']
