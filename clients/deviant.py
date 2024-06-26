@@ -7,23 +7,19 @@ from utils.account import select_account
 from utils.cli_args import parse_arguments
 
 ACCOUNT = parse_arguments().account
-DEVIANT_DATA = select_account(ACCOUNT)['DEVIANT_DATA']
+DEVIANT_DATA = select_account(ACCOUNT)["DEVIANT_DATA"]
 
-CLIENT_ID = DEVIANT_DATA['client_id']
-CLIENT_SECRET = DEVIANT_DATA['client_secret']
-DEVI_MATURE_CLASSIFICATION = DEVIANT_DATA.get('default_mature_classification', None)
-REFRESH_TOKEN = DEVIANT_DATA['refresh_token']
+CLIENT_ID = DEVIANT_DATA["client_id"]
+CLIENT_SECRET = DEVIANT_DATA["client_secret"]
+DEVI_MATURE_CLASSIFICATION = DEVIANT_DATA.get("default_mature_classification", None)
+REFRESH_TOKEN = DEVIANT_DATA["refresh_token"]
+
 
 def obtain_access_token():
     # Token endpoint URL
     token_url = "https://www.deviantart.com/oauth2/token"
 
-    data = {
-        'grant_type': 'refresh_token',
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-        'refresh_token': REFRESH_TOKEN
-    }
+    data = {"grant_type": "refresh_token", "client_id": CLIENT_ID, "client_secret": CLIENT_SECRET, "refresh_token": REFRESH_TOKEN}
     print(data)
 
     response = requests.post(token_url, data=data)
@@ -32,8 +28,8 @@ def obtain_access_token():
     tokens = response.json()
 
     # Extract new access token
-    new_access_token = tokens['access_token']
-    new_refresh_token = tokens['refresh_token']
+    new_access_token = tokens["access_token"]
+    new_refresh_token = tokens["refresh_token"]
     print("Received new tokens")
     print("Access token", new_access_token)
     print("Refresh token", new_refresh_token)
@@ -41,24 +37,16 @@ def obtain_access_token():
 
     return new_access_token
 
+
 def schedule(image_path, caption):
     try:
         access_token = obtain_access_token()
         print(f"Authenticated {access_token}")
         upload_url = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
-        headers = {
-            "Authorization": f"Bearer {access_token}"
-        }
+        headers = {"Authorization": f"Bearer {access_token}"}
 
-        files = {
-            "file": open(image_path, "rb")
-        }
-        data = {
-            "title": caption,
-            "artist_comments": "",
-            "mature_content": "false" if NSFW is False else True,
-            "is_ai_generated": "true"
-        }
+        files = {"file": open(image_path, "rb")}
+        data = {"title": caption, "artist_comments": "", "mature_content": "false" if NSFW is False else True, "is_ai_generated": "true"}
         response = requests.post(upload_url, headers=headers, files=files, data=data)
         json = response.json()
         print("Upload response", json)
@@ -66,10 +54,10 @@ def schedule(image_path, caption):
 
         submit_url = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
         publish_data = {
-            "itemid": json['itemid'],
+            "itemid": json["itemid"],
             "title": caption,
             "artist_comments": "",
-            "is_mature": "false" if os.getenv('NSFW', '1') == '0' else "true",
+            "is_mature": "false" if os.getenv("NSFW", "1") == "0" else "true",
             "is_ai_generated": "true",
             "allow_free_download": "false",
             "display_resolution": get_optimal_resolution(image_path),
