@@ -26,7 +26,7 @@ def add_tags(caption):
       return f'{combined_tags} {caption}'
     return f'{caption} {combined_tags}'
 
-def schedule(image_path, json_path, caption):
+def schedule(image_path, caption):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     old_client = tweepy.API(auth, wait_on_rate_limit=True)

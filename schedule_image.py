@@ -53,10 +53,10 @@ caption = ImageMetadataAdjuster(file).get_caption()
 
 def run():
     if mode == 'Twitter':
-        return clients.twitter.schedule(file, "", caption)
+        return clients.twitter.schedule(file, caption)
 
     if mode == 'Deviant':
-        return clients.deviant.schedule(file, "", caption)
+        return clients.deviant.schedule(file, caption)
 
     print(f"Mode {mode} not recognized")
     return False

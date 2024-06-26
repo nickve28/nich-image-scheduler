@@ -37,7 +37,7 @@ def obtain_access_token():
 
     return new_access_token
 
-def schedule(image_path, json_path, caption):
+def schedule(image_path, caption):
     try:
         access_token = obtain_access_token()
         print(f"Authenticated {access_token}")
