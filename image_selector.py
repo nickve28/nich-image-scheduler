@@ -73,6 +73,10 @@ class Scheduler(QMainWindow):
         # load the list of images and save it as full paths
         self._images: 'list[str]' = find_images_in_folder(DIRECTORY_PATH)
 
+        if len(self._images) == 0:
+            err = f"No images found for account {account_data['ID']} using pattern {DIRECTORY_PATH}"
+            raise RuntimeError(err)
+
         # sort them
         self._images.sort()
 
