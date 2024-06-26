@@ -30,9 +30,9 @@ from utils.account import select_account
 account = parse_arguments().account
 account_data = select_account(account)
 
-DIRECTORY_PATH = account_data["DIRECTORY_PATH"]
-EXTENSIONS = account_data["EXTENSIONS"]
-PLATFORMS = account_data["PLATFORMS"]
+directory_path = account_data["directory_path"]
+extensions = account_data["extensions"]
+platforms = account_data["platforms"]
 
 
 class Scheduler(QMainWindow):
@@ -41,11 +41,11 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: "list[str]" = find_images_in_folder(DIRECTORY_PATH, EXTENSIONS)
+        self._images: "list[str]" = find_images_in_folder(directory_path, extensions)
         random.shuffle(self._images)
 
         if len(self._images) == 0:
-            err = f"No images found for account {account_data['ID']} using pattern {DIRECTORY_PATH}"
+            err = f"No images found for account {account_data['id']} using pattern {directory_path}"
             raise RuntimeError(err)
 
         # sort them
@@ -103,7 +103,7 @@ class Scheduler(QMainWindow):
         target_layout.addWidget(target_label)
 
         # create checkboxes
-        self._targets = PLATFORMS
+        self._targets = platforms
         self._target_checkboxes: "list[QCheckBox]" = []
         for target in self._targets:
             checkbox = QCheckBox(target)

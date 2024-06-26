@@ -12,14 +12,14 @@ args = parse_arguments()
 account = args.account
 account_data = select_account(account)
 
-DIRECTORY_PATH = account_data["DIRECTORY_PATH"]
-EXTENSIONS = account_data["EXTENSIONS"]
-PLATFORMS = account_data["PLATFORMS"]
+directory_path = account_data["directory_path"]
+extensions = account_data["extensions"]
+platforms = account_data["platforms"]
 
 mode = args.mode
 
-if mode is None or mode not in PLATFORMS:
-    err = f"Please provide a valid mode. Choices are: {list(PLATFORMS)}"
+if mode is None or mode not in platforms:
+    err = f"Please provide a valid mode. Choices are: {list(platforms)}"
     raise ValueError(err)
 
 tag_mapping = {"Twitter": "TWIT", "Deviant": "DEVI"}
@@ -32,7 +32,7 @@ posted_tag = f"_{tag}_P"
 def find_random_image_in_folder(folder_path):
     image_paths = []
 
-    for ext in EXTENSIONS:
+    for ext in extensions:
         file_with_ext = f"*{queued_tag}*{ext}"
         print(os.path.join(folder_path, file_with_ext))
         image_paths.extend(glob.glob(os.path.join(folder_path, file_with_ext)))
@@ -56,17 +56,17 @@ def replace_file_tag(filepath):
     return new_filepath
 
 
-file = find_random_image_in_folder(DIRECTORY_PATH)
+file = find_random_image_in_folder(directory_path)
 
 caption = ImageMetadataAdjuster(file).get_caption()
 
 
 def run():
     if mode == "Twitter":
-        return clients.twitter.TwitterClient(account_data["TWITTER_DATA"]).schedule(file, caption)
+        return clients.twitter.TwitterClient(account_data["twitter_config"]).schedule(file, caption)
 
     if mode == "Deviant":
-        return clients.deviant.DeviantClient(account_data["DEVIANT_DATA"]).schedule(file, caption)
+        return clients.deviant.DeviantClient(account_data["deviant_config"]).schedule(file, caption)
 
     print(f"Mode {mode} not recognized")
     return False

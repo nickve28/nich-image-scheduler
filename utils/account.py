@@ -23,15 +23,15 @@ def select_account(account_name: str):
 
     # Set up account data
     data = {
-        "ID": account_data["id"],
-        "DIRECTORY_PATH": account_data["directory_path"],
-        "EXTENSIONS": account_data["extensions"],
-        "PLATFORMS": account_data["platforms"],
-        "TWITTER_DATA": account_data.get("twitter", {}),
-        "DEVIANT_DATA": account_data.get("deviant", {}),
+        "id": account_data["id"],
+        "directory_path": account_data["directory_path"],
+        "extensions": account_data["extensions"],
+        "platforms": account_data["platforms"],
+        "twitter_config": account_data.get("twitter", {}),
+        "deviant_config": account_data.get("deviant", {}),
     }
 
     if "deviant" in account_data:
-        data["DEVIANT_DATA"]["refresh_token"] = get_refresh_token(data["ID"])
+        data["deviant_config"]["refresh_token"] = get_refresh_token(data["id"])
 
     return data
