@@ -1,7 +1,13 @@
 import os
 import glob
 
-from utils.account import ID, DIRECTORY_PATH, EXTENSIONS, PLATFORMS
+from utils.account import account_data, args
+
+# Use the account data based on the provided account name
+ID = account_data['ID']
+DIRECTORY_PATH = account_data['DIRECTORY_PATH']
+EXTENSIONS = account_data['EXTENSIONS']
+PLATFORMS = account_data['PLATFORMS']
 
 print(f"Checking queues for account {ID}")
 print("\n")

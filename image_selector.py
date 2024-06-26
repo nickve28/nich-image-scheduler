@@ -12,7 +12,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap
 
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
-from utils.account import DIRECTORY_PATH, EXTENSIONS, PLATFORMS
+from utils.account import account_data
+
+DIRECTORY_PATH = account_data['DIRECTORY_PATH']
+EXTENSIONS = account_data['EXTENSIONS']
+PLATFORMS = account_data['PLATFORMS']
 
 TWIT_POSTED = '_TWIT_P'
 TWIT_QUEUED = '_TWIT_Q'

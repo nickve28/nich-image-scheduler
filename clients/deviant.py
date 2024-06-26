@@ -3,7 +3,10 @@ import os
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
 from deviant_utils.pick_resolution import get_optimal_resolution
-from utils.account import ACCOUNT, DEVIANT_DATA, NSFW
+from utils.account import account_data, args
+
+ACCOUNT = args.account
+DEVIANT_DATA = account_data['DEVIANT_DATA']
 
 CLIENT_ID = DEVIANT_DATA['client_id']
 CLIENT_SECRET = DEVIANT_DATA['client_secret']

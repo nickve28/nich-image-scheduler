@@ -1,8 +1,11 @@
 from flask import Flask, request, redirect
 import requests
 
-from utils.account import DEVIANT_DATA, ACCOUNT
 from deviant_utils.deviant_refresh_token import write_token_to_file
+from utils.account import account_data, args
+
+DEVIANT_DATA = account_data['DEVIANT_DATA']
+ACCOUNT = args.account
 
 # Creates a spin off webserver to retrieve an access and refresh token for the first time, visit localhost:3000/login
 
