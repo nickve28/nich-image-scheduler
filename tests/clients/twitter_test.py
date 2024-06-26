@@ -1,15 +1,10 @@
 from collections import namedtuple
-import os
-import sys
 from typing import Dict
 import unittest
 from unittest.mock import Mock, mock_open, patch
-import uuid
-import pytest
 import tweepy
 
 from clients.twitter import TwitterClient
-import requests_mock
 
 
 def get_fake_config(partial: Dict[str, any] = {}):
