@@ -38,7 +38,7 @@ class DeviantClient:
 
     def schedule(self, image_path, caption):
         nsfw = self.config.get("nsfw", False)
-        mature_content = "false" if nsfw is False else True
+        mature_content = "false" if nsfw is False else "true"
 
         try:
             access_token = self._obtain_access_token()
