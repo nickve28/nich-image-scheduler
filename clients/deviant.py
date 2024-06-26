@@ -2,6 +2,10 @@ import requests
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
 
+TOKEN_URL = "https://www.deviantart.com/oauth2/token"
+UPLOAD_URL = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
+SUBMIT_URL = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
+
 
 class DeviantClient:
     def __init__(self, account_id, config):
@@ -10,16 +14,14 @@ class DeviantClient:
 
     def _obtain_access_token(self):
         # Token endpoint URL
-        config = self.config["id"]
         client_id = self.config["client_id"]
         client_secret = self.config["client_secret"]
         refresh_token = self.config["refresh_token"]
-        token_url = "https://www.deviantart.com/oauth2/token"
 
         data = {"grant_type": "refresh_token", "client_id": client_id, "client_secret": client_secret, "refresh_token": refresh_token}
         print(data)
 
-        response = requests.post(token_url, data=data)
+        response = requests.post(TOKEN_URL, data=data)
 
         # Parse response JSON
         tokens = response.json()
@@ -35,13 +37,13 @@ class DeviantClient:
         return new_access_token
 
     def schedule(self, image_path, caption):
-        nsfw = self.config["nsfw"]
+        nsfw = self.config.get("nsfw", False)
         mature_content = "false" if nsfw is False else True
 
         try:
             access_token = self._obtain_access_token()
             print(f"Authenticated {access_token}")
-            upload_url = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
+            upload_url = UPLOAD_URL
             headers = {"Authorization": f"Bearer {access_token}"}
 
             files = {"file": open(image_path, "rb")}
@@ -51,7 +53,6 @@ class DeviantClient:
             print("Upload response", json)
             # {'status': 'success', 'itemid': ---, 'stack': 'Sta.sh Uploads 90', 'stackid': ---}
 
-            submit_url = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
             publish_data = {
                 "itemid": json["itemid"],
                 "title": caption,
@@ -63,7 +64,7 @@ class DeviantClient:
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
                 "tags": "",
             }
-            response = requests.post(submit_url, headers=headers, data=publish_data)
+            response = requests.post(SUBMIT_URL, headers=headers, data=publish_data)
             submit_response = response.json()
             print("Submit response", submit_response)
             return True
