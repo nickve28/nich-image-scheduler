@@ -1,7 +1,11 @@
+import os
 import sys
 from typing import Dict
 import unittest
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
+import uuid
+
+from deviant_utils.deviant_refresh_token import get_refresh_token
 
 print(sys.path)
 from clients.deviant import SUBMIT_URL, TOKEN_URL, UPLOAD_URL, DeviantClient
@@ -14,23 +18,23 @@ def get_fake_config(partial: Dict[str, any] = {}):
     return config
 
 
-@patch("builtins.open")
-def test_post_image_successfully():
-    with requests_mock.Mocker() as req_mock:
-        req_mock.post(TOKEN_URL, json={"refresh_token": "12345", "access_token": "acc123"})
-        req_mock.post(UPLOAD_URL, json={"itemid": "1"})
-        req_mock.post(SUBMIT_URL, json={})
-        client = DeviantClient("test", get_fake_config())
+class TestDeviantClient(unittest.TestCase):
+    def test_post_image_successfully(self):
+        with requests_mock.Mocker() as req_mock:
+            req_mock.post(TOKEN_URL, json={"refresh_token": "12345", "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "1"})
+            req_mock.post(SUBMIT_URL, json={})
+            client = DeviantClient("test", get_fake_config())
 
-        assert client.schedule("tests/fixtures/fake.jpg", "some caption") == True
+            assert client.schedule("tests/fixtures/fake.jpg", "some caption") == True
 
+    def test_post_image_successfully_writes_refresh_token(self):
+        with requests_mock.Mocker() as req_mock:
+            random_token = str(uuid.uuid4())
+            req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "1"})
+            req_mock.post(SUBMIT_URL, json={})
 
-def test_post_image_successfully_writes_refresh_token():
-    with requests_mock.Mocker() as req_mock:
-        req_mock.post(TOKEN_URL, json={"refresh_token": "12345", "access_token": "acc123"})
-        req_mock.post(UPLOAD_URL, json={"itemid": "1"})
-        req_mock.post(SUBMIT_URL, json={})
-
-        with patch("builtins.open", unittest.mock.mock_open(read_data="12345")) as mock_open:
             DeviantClient("test", get_fake_config()).schedule("tests/fixtures/fake.jpg", "some caption")
-            mock_open.assert_called_once_with("foo", "rw")
+
+            assert get_refresh_token("test") == random_token
