@@ -1,0 +1,15 @@
+TWIT_POSTED = '_TWIT_P'
+TWIT_QUEUED = '_TWIT_Q'
+
+DEVI_POSTED = '_DEVI_P'
+DEVI_QUEUED = '_DEVI_Q'
+
+QUEUE_TAG_MAPPING = {
+    'Twitter': TWIT_QUEUED,
+    'Deviant': DEVI_QUEUED
+}
+
+POSTED_TAG_MAPPING = {
+    'Twitter': TWIT_POSTED,
+    'Deviant': DEVI_POSTED
+}

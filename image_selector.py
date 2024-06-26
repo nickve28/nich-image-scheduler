@@ -11,59 +11,15 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap
 
+from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED
+from utils.file_utils import find_images_in_folder, rename_file_with_tags
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account import account_data
+
 
 DIRECTORY_PATH = account_data['DIRECTORY_PATH']
 EXTENSIONS = account_data['EXTENSIONS']
 PLATFORMS = account_data['PLATFORMS']
-
-TWIT_POSTED = '_TWIT_P'
-TWIT_QUEUED = '_TWIT_Q'
-
-DEVI_POSTED = '_DEVI_P'
-DEVI_QUEUED = '_DEVI_Q'
-
-QUEUE_TAG_MAPPING = {
-    'Twitter': TWIT_QUEUED,
-    'Deviant': DEVI_QUEUED
-}
-
-POSTED_TAG_MAPPING = {
-    'Twitter': TWIT_POSTED,
-    'Deviant': DEVI_POSTED
-}
-
-def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
-    # Split the file path into directory, filename, and extension
-    directory, basename = os.path.split(filepath)
-    filename, file_extension = os.path.splitext(basename)
-    new_filename_without_extension = filename
-    for platform, checked in platform_dict.items():
-        # Check if tag is already in the filename
-        queued_tag = QUEUE_TAG_MAPPING[platform]
-
-        if (not checked) and queued_tag in filename:
-            new_filename_without_extension = new_filename_without_extension.replace(queued_tag, '')
-        elif checked and queued_tag not in filename:
-            new_filename_without_extension = f"{new_filename_without_extension}{queued_tag}"
-    new_filepath = os.path.join(directory, f"{new_filename_without_extension}{file_extension}")
-    print(f"Renaming {filepath} to {new_filepath}")
-    os.rename(filepath, new_filepath)
-    return new_filepath
-
-def exclude_files(files):
-    # todo only filter active platforms
-    return [f for f in files if (TWIT_POSTED not in f) and (DEVI_POSTED not in f)]
-
-def find_images_in_folder(folder_path):
-    image_paths = []
-    for ext in EXTENSIONS:
-        files = glob.glob(os.path.join(folder_path, f'*{ext}'))
-        filtered_files = exclude_files(files)
-        image_paths.extend(filtered_files)
-    random.shuffle(image_paths)
-    return image_paths
 
 class Scheduler(QMainWindow):
     def __init__(self):
@@ -71,7 +27,8 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: 'list[str]' = find_images_in_folder(DIRECTORY_PATH)
+        self._images: 'list[str]' = find_images_in_folder(DIRECTORY_PATH, EXTENSIONS)
+        random.shuffle(self._images)
 
         if len(self._images) == 0:
             err = f"No images found for account {account_data['ID']} using pattern {DIRECTORY_PATH}"
