@@ -5,6 +5,24 @@ from typing import Dict
 from utils.constants import DEVI_POSTED, QUEUE_TAG_MAPPING, TWIT_POSTED
 
 
+def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
+    # Replaces the old tag, eg: TWIT_Q with the new one, eg TWIT_P
+    # Split the file path into directory, filename, and extension
+    directory, basename = os.path.split(filepath)
+    filename, file_extension = os.path.splitext(basename)
+
+    # Construct the new filename
+    new_name = filename.replace(old_tag, new_tag)
+    new_filename = f"{new_name}{file_extension}"
+
+    new_filepath = os.path.join(directory, new_filename)
+
+    # Rename the file
+    os.rename(filepath, new_filepath)
+    print(f"Renamed {filepath} to {new_filepath}")
+    return new_filepath
+
+
 # Renames the given filepath, depending on the selected options provided in the platform_dict
 # Adds or no-ops the platform_Q name, if selected
 # Removes or no-ops the platform_Q name, if deselected

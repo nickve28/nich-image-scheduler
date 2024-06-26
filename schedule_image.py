@@ -6,6 +6,7 @@ import clients.deviant
 import clients.twitter
 from utils.cli_args import parse_arguments
 from utils.constants import POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING, TAG_MAPPING
+from utils.file_utils import replace_file_tag
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account import select_account
 
@@ -38,23 +39,6 @@ def find_random_image_in_folder(folder_path):
     return random.sample(image_paths, 1)[0]
 
 
-def replace_file_tag(filepath):
-    # Split the file path into directory, filename, and extension
-    directory, basename = os.path.split(filepath)
-    filename, file_extension = os.path.splitext(basename)
-
-    # Construct the new filename
-    new_name = filename.replace(queued_tag, posted_tag)
-    new_filename = f"{new_name}{file_extension}"
-
-    new_filepath = os.path.join(directory, new_filename)
-
-    # Rename the file
-    os.rename(filepath, new_filepath)
-    print(f"Renamed {filepath} to {new_filepath}")
-    return new_filepath
-
-
 file = find_random_image_in_folder(directory_path)
 
 caption = ImageMetadataAdjuster(file).get_caption()
@@ -72,7 +56,7 @@ def run():
 
 
 if run() == True:
-    new_filepath = replace_file_tag(file)
+    new_filepath = replace_file_tag(file, queued_tag, posted_tag)
 
     # image adjuster currently hold a file reference which blocks editing the name
     adjuster = ImageMetadataAdjuster(new_filepath)
