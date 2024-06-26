@@ -5,13 +5,17 @@ import random
 import clients.deviant
 import clients.twitter
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
-from utils.account import DIRECTORY_PATH, EXTENSIONS, PLATFORMS
+from utils.account import account_data, args
 
-mode = os.getenv('MODE')
+DIRECTORY_PATH = account_data['DIRECTORY_PATH']
+EXTENSIONS = account_data['EXTENSIONS']
+PLATFORMS = account_data['PLATFORMS']
+
+mode = args.mode
 
 if mode is None or mode not in PLATFORMS:
-    err = f"Please provide an env var MODE= with one of: {list(PLATFORMS)}"
-    raise RuntimeError(err)
+    err = f"Please provide a valid mode. Choices are: {list(PLATFORMS)}"
+    raise ValueError(err)
 
 tag_mapping = {
     'Twitter': 'TWIT',

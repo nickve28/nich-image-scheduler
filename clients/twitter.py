@@ -2,7 +2,9 @@ import tweepy
 import random
 
 from utils.text_utils import to_cursive
-from utils.account import TWITTER_DATA
+from utils.account import account_data
+
+TWITTER_DATA = account_data['TWITTER_DATA']
 
 BEARER_TOKEN = TWITTER_DATA['bearer_token']
 CONSUMER_KEY = TWITTER_DATA['consumer_key']
