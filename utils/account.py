@@ -1,6 +1,5 @@
 import yaml
 import os
-import argparse
 from deviant_utils.deviant_refresh_token import get_refresh_token
 
 current_script_path = os.path.dirname(os.path.abspath(__file__))
