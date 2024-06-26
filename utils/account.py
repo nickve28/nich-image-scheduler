@@ -20,6 +20,7 @@ account_data = yaml_data[ACCOUNT]
 
 # exports
 ID = account_data['id']
+NSFW = account_data.get('nsfw', False)
 DIRECTORY_PATH = account_data['directory_path']
 EXTENSIONS = account_data['extensions']
 PLATFORMS = account_data['platforms']

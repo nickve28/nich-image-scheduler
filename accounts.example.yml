@@ -8,7 +8,7 @@ my_account:
   platforms:
     - Twitter
     - Deviant
-  nsfw: 0
+  nsfw: false
   twitter:
     consumer_key: t123
     consumer_secret: t456

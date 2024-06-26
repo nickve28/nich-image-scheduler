@@ -3,7 +3,7 @@ import os
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
 from deviant_utils.pick_resolution import get_optimal_resolution
-from utils.account import ACCOUNT, DEVIANT_DATA
+from utils.account import ACCOUNT, DEVIANT_DATA, NSFW
 
 CLIENT_ID = DEVIANT_DATA['client_id']
 CLIENT_SECRET = DEVIANT_DATA['client_secret']
@@ -52,7 +52,7 @@ def schedule(image_path, json_path, caption):
         data = {
             "title": caption,
             "artist_comments": "",
-            "mature_content": "false" if os.getenv('NSFW', '1') == '0' else "true",
+            "mature_content": "false" if NSFW is False else True,
             "is_ai_generated": "true"
         }
         response = requests.post(upload_url, headers=headers, files=files, data=data)

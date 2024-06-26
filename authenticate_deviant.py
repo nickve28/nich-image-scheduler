@@ -1,6 +1,5 @@
 from flask import Flask, request, redirect
 import requests
-import os
 
 from utils.account import DEVIANT_DATA, ACCOUNT
 from deviant_utils.deviant_refresh_token import write_token_to_file
