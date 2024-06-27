@@ -33,6 +33,7 @@ class DeviantClient:
 
         # Parse response JSON
         tokens = response.json()
+        print("Debug token response", tokens)
 
         # Extract new access token
         new_access_token = tokens["access_token"]
