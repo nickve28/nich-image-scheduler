@@ -5,10 +5,12 @@ from deviant_utils.deviant_refresh_token import get_refresh_token
 current_script_path = os.path.dirname(os.path.abspath(__file__))
 parent_path = os.path.abspath(os.path.join(current_script_path, os.pardir))
 
+project_root = os.path.abspath(os.path.join(parent_path, ".."))
+
 
 def load_accounts():
     # Loads the provided accounts.yml file to use
-    return yaml.safe_load(open(os.path.join(parent_path, "accounts.yml")))
+    return yaml.safe_load(open(os.path.join(project_root, "accounts.yml")))
 
 
 def select_account(account_name: str):

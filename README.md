@@ -4,6 +4,9 @@ Draft
 
 ## Rough idea
 
+Initial: install hatch and switch to platform needed
+`hatch shell <default|dev|test>
+
 ## 1. set up an accounts.yml
 
 See the provided accounts.example.yml for a baseline

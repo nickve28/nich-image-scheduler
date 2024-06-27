@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import Mock, mock_open, patch
 import tweepy
 
-from clients.twitter import TwitterClient
+from src.clients.twitter import TwitterClient
 
 
 def get_fake_config(partial: Dict[str, any] = {}):

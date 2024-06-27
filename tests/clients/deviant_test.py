@@ -5,9 +5,9 @@ import unittest
 from unittest.mock import mock_open, patch
 import uuid
 
-from deviant_utils.deviant_refresh_token import get_refresh_token
+from src.deviant_utils.deviant_refresh_token import get_refresh_token
 
-from clients.deviant import SUBMIT_URL, TOKEN_URL, UPLOAD_URL, DeviantClient
+from src.clients.deviant import SUBMIT_URL, TOKEN_URL, UPLOAD_URL, DeviantClient
 import requests_mock
 
 

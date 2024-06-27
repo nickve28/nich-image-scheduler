@@ -5,3 +5,34 @@ line-length = 150
 testpaths = [
     "tests"
 ]
+
+[project]
+name  = "nich-image-scheduler"
+description = "allows adding captions into images and queueing/scheduling them with the assistance of systemd or similar"
+requires-python = ">=3.12.4"
+version = "0.0.2"
+
+[tool.hatch.envs]
+[tool.hatch.envs.default]
+dependencies = [
+    "Flask==3.0.3",
+    "piexif==1.1.3",
+    "Pillow==10.3.0",
+    "PyYAML==6.0.1",
+    "Requests==2.32.3",
+    "tweepy==4.14.0"
+]
+
+[tool.hatch.envs.test]
+extra-dependencies = [
+    "pytest==8.2.2",
+    "requests_mock==1.12.1"
+]
+
+[tool.hatch.envs.dev]
+inherit = ["test"]
+extra-dependencies = [
+    "black==24.4.2",
+    "PyQt5==5.15.10",
+    "PyQt5_sip==12.13.0"
+]

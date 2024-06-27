@@ -18,10 +18,13 @@ jobs:
       with:
         python-version: '3.12.4'  # Specify the Python version you need
 
+    - name: Install Hatch
+      uses: pypa/hatch@install
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
+        hatch shell test
 
     - name: Run tests
       run: |
