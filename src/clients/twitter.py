@@ -1,9 +1,7 @@
 import tweepy
 import random
 
-from utils.cli_args import parse_arguments
 from utils.text_utils import to_cursive
-from utils.account import select_account
 
 DEFAULT_TAGS = [
     "#AIart",
