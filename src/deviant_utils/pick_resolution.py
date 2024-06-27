@@ -1,5 +1,6 @@
 from PIL import Image
 
+
 def get_optimal_resolution(image_path):
     widths = [400, 600, 800, 900, 1024, 1280, 1600, 1920]
     with Image.open(image_path) as img:

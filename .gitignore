@@ -1,10 +1,10 @@
 *.env*
 /venv
 __pycache__/
-schedules.crontab
-refresh_token_cache
-bin/
-profiles/
-crontasks/
 .stfolder
 .stignore
+/accounts.yml
+
+refresh_token_cache/*
+!refresh_token_cache/.keep
+!refresh_token_cache/test_account

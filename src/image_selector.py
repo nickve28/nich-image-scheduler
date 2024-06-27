@@ -6,64 +6,34 @@ from typing import Dict
 
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QPushButton, QLabel, QHBoxLayout, QVBoxLayout, QScrollArea, QCheckBox,
-    QMessageBox, QApplication, QLineEdit, QSizePolicy
+    QMainWindow,
+    QWidget,
+    QPushButton,
+    QLabel,
+    QHBoxLayout,
+    QVBoxLayout,
+    QScrollArea,
+    QCheckBox,
+    QApplication,
+    QLineEdit,
+    QSizePolicy,
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap
 
-from image_metadata_adjuster import ImageMetadataAdjuster
+from utils.cli_args import parse_arguments
+from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED
+from utils.file_utils import find_images_in_folder, rename_file_with_tags
+from utils.image_metadata_adjuster import ImageMetadataAdjuster
+from utils.account import select_account
 
-DIRECTORY_PATH = os.getenv('DIRECTORY_PATH')
-EXTENSIONS = os.getenv('EXTENSIONS').split(',')
-MODE = os.getenv('MODE')
-PLATFORMS = os.getenv('PLATFORMS', '').split(',')
 
-TWIT_POSTED = '_TWIT_P'
-TWIT_QUEUED = '_TWIT_Q'
+account = parse_arguments().account
+account_data = select_account(account)
 
-DEVI_POSTED = '_DEVI_P'
-DEVI_QUEUED = '_DEVI_Q'
+directory_path = account_data["directory_path"]
+extensions = account_data["extensions"]
+platforms = account_data["platforms"]
 
-QUEUE_TAG_MAPPING = {
-    'Twitter': TWIT_QUEUED,
-    'Deviant': DEVI_QUEUED
-}
-
-POSTED_TAG_MAPPING = {
-    'Twitter': TWIT_POSTED,
-    'Deviant': DEVI_POSTED
-}
-
-def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
-    # Split the file path into directory, filename, and extension
-    directory, basename = os.path.split(filepath)
-    filename, file_extension = os.path.splitext(basename)
-    new_filename_without_extension = filename
-    for platform, checked in platform_dict.items():
-        # Check if tag is already in the filename
-        queued_tag = QUEUE_TAG_MAPPING[platform]
-
-        if (not checked) and queued_tag in filename:
-            new_filename_without_extension = new_filename_without_extension.replace(queued_tag, '')
-        elif checked and queued_tag not in filename:
-            new_filename_without_extension = f"{filename}{queued_tag}"
-    new_filepath = os.path.join(directory, f"{new_filename_without_extension}{file_extension}")
-    print(f"Renaming {filepath} to {new_filepath}")
-    os.rename(filepath, new_filepath)
-    return new_filepath
-
-def exclude_files(files):
-    # todo only filter active platforms
-    return [f for f in files if (TWIT_POSTED not in f) and (DEVI_POSTED not in f)]
-
-def find_images_in_folder(folder_path):
-    image_paths = []
-    for ext in EXTENSIONS:
-        files = glob.glob(os.path.join(folder_path, f'*{ext}'))
-        filtered_files = exclude_files(files)
-        image_paths.extend(filtered_files)
-    random.shuffle(image_paths)
-    return image_paths
 
 class Scheduler(QMainWindow):
     def __init__(self):
@@ -71,7 +41,12 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: 'list[str]' = find_images_in_folder(DIRECTORY_PATH)
+        self._images: "list[str]" = find_images_in_folder(directory_path, extensions)
+        random.shuffle(self._images)
+
+        if len(self._images) == 0:
+            err = f"No images found for account {account_data['id']} using pattern {directory_path}"
+            raise RuntimeError(err)
 
         # sort them
         self._images.sort()
@@ -96,10 +71,10 @@ class Scheduler(QMainWindow):
 
         # current caption
         self._caption = QLineEdit()
-        self._caption.setPlaceholderText('Enter a caption here...')
+        self._caption.setPlaceholderText("Enter a caption here...")
 
         # save
-        self._submit_button = QPushButton('Save')
+        self._submit_button = QPushButton("Save")
         self._submit_button.clicked.connect(self.submit_callback)
 
         # image selector
@@ -123,13 +98,13 @@ class Scheduler(QMainWindow):
         target_layout.setContentsMargins(0, 0, 0, 0)
 
         # create label
-        target_label = QLabel('Targets')
+        target_label = QLabel("Targets")
         target_label.setFixedHeight(20)
         target_layout.addWidget(target_label)
 
         # create checkboxes
-        self._targets = PLATFORMS
-        self._target_checkboxes: 'list[QCheckBox]' = []
+        self._targets = platforms
+        self._target_checkboxes: "list[QCheckBox]" = []
         for target in self._targets:
             checkbox = QCheckBox(target)
             checkbox.setFixedHeight(20)
@@ -212,7 +187,7 @@ class Scheduler(QMainWindow):
         self._image.setPixmap(QPixmap(image).scaledToHeight(900, Qt.SmoothTransformation))
 
         # change the caption
-        caption = ImageMetadataAdjuster(image).get_caption() or ''
+        caption = ImageMetadataAdjuster(image).get_caption() or ""
         self._caption.setText(caption)
 
         # todo, can probably be done more elegant with mapping dicts
@@ -223,13 +198,13 @@ class Scheduler(QMainWindow):
         queued_to_deviant = DEVI_QUEUED in image
 
         for checkbox in self._target_checkboxes:
-            if checkbox.text() == 'Twitter':
-              checkbox.setChecked((not posted_to_twitter) and queued_to_twitter)
-              checkbox.setEnabled(not posted_to_twitter)
+            if checkbox.text() == "Twitter":
+                checkbox.setChecked((not posted_to_twitter) and queued_to_twitter)
+                checkbox.setEnabled(not posted_to_twitter)
 
-            if checkbox.text() == 'Deviant':
-              checkbox.setChecked((not posted_to_deviant) and queued_to_deviant)
-              checkbox.setEnabled(not posted_to_deviant)
+            if checkbox.text() == "Deviant":
+                checkbox.setChecked((not posted_to_deviant) and queued_to_deviant)
+                checkbox.setEnabled(not posted_to_deviant)
 
     def submit_callback(self) -> None:
         caption = self._caption.text()
@@ -243,7 +218,8 @@ class Scheduler(QMainWindow):
         self._current_image = new_filename
         self._images[self._current_index] = new_filename
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = Scheduler()
     sys.exit(app.exec_())
