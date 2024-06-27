@@ -24,8 +24,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        hatch shell test
 
     - name: Run tests
       run: |
-        pytest -v
+        hatch env create test
+        hatch run test:pytest -v
