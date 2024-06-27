@@ -10,7 +10,7 @@ def get_refresh_token(name):
     file_path = os.path.join(cache_path, name)
 
     if os.path.exists(file_path):
-        return open(file_path, "r").read()
+        return open(file_path, "r").read().replace("\n", "")  # in case of manual interference
     return None
 
 
