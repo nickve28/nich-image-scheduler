@@ -3,7 +3,7 @@
 __pycache__/
 .stfolder
 .stignore
-accounts.yml
+/accounts.yml
 
 refresh_token_cache/*
 !refresh_token_cache/.keep
