@@ -1,5 +1,3 @@
-import os
-import sys
 from typing import Dict
 import unittest
 from unittest.mock import mock_open, patch
