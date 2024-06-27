@@ -7,3 +7,4 @@ accounts.yml
 
 refresh_token_cache/*
 !refresh_token_cache/.keep
+!refresh_token_cache/test_account
