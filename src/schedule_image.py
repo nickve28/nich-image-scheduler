@@ -55,10 +55,10 @@ caption = ImageMetadataAdjuster(file).get_caption()
 
 def run():
     if mode == "Twitter":
-        return clients.twitter.TwitterClient(account_data["twitter_config"]).schedule(file, caption)
+        return clients.twitter.TwitterClient(account_data).schedule(file, caption)
 
     if mode == "Deviant":
-        return clients.deviant.DeviantClient(account, account_data["deviant_config"]).schedule(file, caption)
+        return clients.deviant.DeviantClient(account, account_data).schedule(file, caption)
 
     if mode == "Debug":
         return clients.test.TestClient("some_id", account_data).schedule(file, caption)

@@ -10,7 +10,8 @@ SUBMIT_URL = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
 class DeviantClient:
     def __init__(self, account_id, config):
         self.account_id = account_id
-        self.config = config
+        self.config = config["deviant_config"]
+        self.nsfw = config["nsfw"]
 
     def _obtain_access_token(self):
         # Token endpoint URL
@@ -37,8 +38,7 @@ class DeviantClient:
         return new_access_token
 
     def schedule(self, image_path, caption):
-        nsfw = self.config["nsfw"]
-        mature_content = "false" if nsfw is False else "true"
+        mature_content = "false" if self.nsfw is False else "true"
 
         try:
             access_token = self._obtain_access_token()

@@ -10,8 +10,13 @@ import requests_mock
 
 
 def get_fake_config(partial: Dict[str, any] = {}):
-    config = {"client_id": 123, "client_secret": 456, "default_mature_classification": "", "refresh_token": "111", "nsfw": False}
-    config.update(partial)
+    config = {"deviant_config": {"client_id": 123, "client_secret": 456, "default_mature_classification": "", "refresh_token": "111"}, "nsfw": False}
+
+    if "deviant_config" in partial:
+        config["deviant_config"].update(partial["deviant_config"])
+        config.update(partial)
+    if "nsfw" in partial:
+        config["nsfw"] = partial["nsfw"]
     return config
 
 

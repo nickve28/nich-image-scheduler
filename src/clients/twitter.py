@@ -30,10 +30,10 @@ def add_tags(caption, tags, tag_position, tag_count):
 
 class TwitterClient:
     def __init__(self, config):
-        self.config = config
-        self.tags = config.get("tags", DEFAULT_TAGS)
-        self.tag_count = config.get("tag_count", DEFAULT_TAG_COUNT)
-        self.tag_position = config.get("tag_position", "append")
+        self.config = config["twitter_config"]
+        self.tags = self.config.get("tags", DEFAULT_TAGS)
+        self.tag_count = self.config.get("tag_count", DEFAULT_TAG_COUNT)
+        self.tag_position = self.config.get("tag_position", "append")
 
     def decorate_caption(self, caption):
         return add_tags(caption=decorate_caption(caption, self.config), tags=self.tags, tag_count=self.tag_count, tag_position=self.tag_position)
