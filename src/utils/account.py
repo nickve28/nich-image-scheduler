@@ -29,6 +29,7 @@ def select_account(account_name: str):
         "directory_path": account_data["directory_path"],
         "extensions": account_data["extensions"],
         "platforms": account_data["platforms"],
+        "nsfw": account_data.get("nsfw", False),
         "twitter_config": account_data.get("twitter", {}),
         "deviant_config": account_data.get("deviant", {}),
     }

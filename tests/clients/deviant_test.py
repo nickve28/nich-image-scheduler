@@ -12,7 +12,7 @@ import requests_mock
 
 
 def get_fake_config(partial: Dict[str, any] = {}):
-    config = {"client_id": 123, "client_secret": 456, "default_mature_classification": "", "refresh_token": "111"}
+    config = {"client_id": 123, "client_secret": 456, "default_mature_classification": "", "refresh_token": "111", "nsfw": False}
     config.update(partial)
     return config
 
