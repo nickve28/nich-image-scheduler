@@ -4,6 +4,7 @@ import random
 
 import clients.deviant
 import clients.twitter
+import clients.test
 from utils.cli_args import parse_arguments
 from utils.constants import POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING, TAG_MAPPING
 from utils.file_utils import replace_file_tag
@@ -19,14 +20,22 @@ extensions = account_data["extensions"]
 platforms = account_data["platforms"]
 
 mode = args.mode
+debugging = mode == "Debug"
 
-if mode is None or mode not in platforms:
+if ((mode is None) or (mode not in platforms)) and (not debugging):
     err = f"Please provide a valid mode. Choices are: {list(platforms)}"
     raise ValueError(err)
 
-tag = TAG_MAPPING[mode]
-queued_tag = QUEUE_TAG_MAPPING[mode]
-posted_tag = POSTED_TAG_MAPPING[mode]
+
+def read_from(dict, key, fallback):
+    if debugging:
+        return fallback
+    return dict[key]
+
+
+tag = read_from(TAG_MAPPING, mode, "TWIT")
+queued_tag = read_from(QUEUE_TAG_MAPPING, mode, "TWIT_Q")
+posted_tag = read_from(POSTED_TAG_MAPPING, mode, "TWIT_P")
 
 
 def find_random_image_in_folder(folder_path):
@@ -50,6 +59,9 @@ def run():
 
     if mode == "Deviant":
         return clients.deviant.DeviantClient(account_data["deviant_config"]).schedule(file, caption)
+
+    if mode == "Debug":
+        return clients.test.TestClient("some_id", account_data).schedule(file, caption)
 
     print(f"Mode {mode} not recognized")
     return False
