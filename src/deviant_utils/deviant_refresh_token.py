@@ -9,7 +9,9 @@ def get_refresh_token(name):
     cache_path = os.path.join(project_root, "refresh_token_cache")
     file_path = os.path.join(cache_path, name)
 
-    return open(file_path, "r").read()
+    if os.path.exists(file_path):
+        return open(file_path, "r").read()
+    return None
 
 
 def write_token_to_file(name, refresh_token):
