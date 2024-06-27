@@ -9,7 +9,7 @@ testpaths = [
 [project]
 name  = "nich-image-scheduler"
 description = "allows adding captions into images and queueing/scheduling them with the assistance of systemd or similar"
-requires-python = ">=3.12.4"
+requires-python = ">=3.11.2"
 version = "0.0.2"
 
 [tool.hatch.envs]
