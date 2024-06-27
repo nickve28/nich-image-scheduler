@@ -1,6 +1,7 @@
 import requests
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
+from models.account import Account
 
 TOKEN_URL = "https://www.deviantart.com/oauth2/token"
 UPLOAD_URL = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
@@ -8,18 +9,24 @@ SUBMIT_URL = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
 
 
 class DeviantClient:
-    def __init__(self, account_id, config):
-        self.account_id = account_id
-        self.config = config["deviant_config"]
-        self.nsfw = config["nsfw"]
+    account: Account
+
+    def __init__(self, account: Account):
+        if not account.deviant_config:
+            raise RuntimeError("No Deviant config found")
+
+        self.account = account
 
     def _obtain_access_token(self):
         # Token endpoint URL
-        client_id = self.config["client_id"]
-        client_secret = self.config["client_secret"]
-        refresh_token = self.config["refresh_token"]
+        config = self.account.deviant_config
 
-        data = {"grant_type": "refresh_token", "client_id": client_id, "client_secret": client_secret, "refresh_token": refresh_token}
+        data = {
+            "grant_type": "refresh_token",
+            "client_id": config.client_id,
+            "client_secret": config.client_id,
+            "refresh_token": config.refresh_token,
+        }
         print(data)
 
         response = requests.post(TOKEN_URL, data=data)
@@ -33,12 +40,12 @@ class DeviantClient:
         print("Received new tokens")
         print("Access token", new_access_token)
         print("Refresh token", new_refresh_token)
-        write_token_to_file(self.account_id, new_refresh_token)
+        write_token_to_file(self.account.id, new_refresh_token)
 
         return new_access_token
 
     def schedule(self, image_path, caption):
-        mature_content = "false" if self.nsfw is False else "true"
+        mature_content = "false" if self.account.nsfw is False else "true"
 
         try:
             access_token = self._obtain_access_token()

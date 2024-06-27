@@ -5,6 +5,7 @@ line-length = 150
 testpaths = [
     "tests"
 ]
+pythonpath = ["./src"]
 
 [project]
 name  = "nich-image-scheduler"
