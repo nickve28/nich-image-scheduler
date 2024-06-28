@@ -21,7 +21,7 @@ class TwitterClient:
 
     def __init__(self, account: Account):
         if not account.twitter_config:
-            raise RuntimeError("No Deviant config found")
+            raise RuntimeError("No Twitter config found")
         self.account = account
 
     def decorate_caption(self, caption):

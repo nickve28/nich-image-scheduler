@@ -39,7 +39,7 @@ class Scheduler(QMainWindow):
         random.shuffle(self._images)
 
         if len(self._images) == 0:
-            err = f"No images found for account {account_data['id']} using pattern {account.directory_path}"
+            err = f"No images found for account {account.id} using pattern {account.directory_path}"
             raise RuntimeError(err)
 
         # sort them
