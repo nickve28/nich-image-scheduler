@@ -1,5 +1,3 @@
-import glob
-import os
 import random
 import sys
 from typing import Dict
@@ -24,15 +22,11 @@ from utils.cli_args import parse_arguments
 from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED
 from utils.file_utils import find_images_in_folder, rename_file_with_tags
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
-from utils.account import select_account
+from utils.account_loader import select_account
 
 
-account = parse_arguments().account
-account_data = select_account(account)
-
-directory_path = account_data["directory_path"]
-extensions = account_data["extensions"]
-platforms = account_data["platforms"]
+account_data = parse_arguments().account
+account = select_account(account_data)
 
 
 class Scheduler(QMainWindow):
@@ -41,11 +35,11 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: "list[str]" = find_images_in_folder(directory_path, extensions)
+        self._images: "list[str]" = find_images_in_folder(account.directory_path, account.extensions)
         random.shuffle(self._images)
 
         if len(self._images) == 0:
-            err = f"No images found for account {account_data['id']} using pattern {directory_path}"
+            err = f"No images found for account {account.id} using pattern {account.directory_path}"
             raise RuntimeError(err)
 
         # sort them
@@ -103,7 +97,7 @@ class Scheduler(QMainWindow):
         target_layout.addWidget(target_label)
 
         # create checkboxes
-        self._targets = platforms
+        self._targets = account.platforms
         self._target_checkboxes: "list[QCheckBox]" = []
         for target in self._targets:
             checkbox = QCheckBox(target)

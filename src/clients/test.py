@@ -1,13 +1,17 @@
+from models.account import Account
+
+
 class TestClient:
-    def __init__(self, account_id, config):
-        self.account_id = account_id
-        self.config = config
+    account: Account
+
+    def __init__(self, account: Account):
+        self.account = account
 
     def schedule(self, image_path, caption):
         print(f"Received in schedule args: {image_path}, {caption}")
         print(f"Provided account_id\n")
-        print(self.account_id)
+        print(self.account.id)
         print(f"Provided config:\n")
-        print(self.config)
+        print(self.account)
 
         return False
