@@ -35,7 +35,7 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: "list[str]" = find_images_in_folder(account.directory_path, account.extensions)
+        self._images: "list[str]" = find_images_in_folder(account.directory_path, account.extensions, account.platforms)
         random.shuffle(self._images)
 
         if len(self._images) == 0:
