@@ -2,7 +2,7 @@ import glob
 import os
 from typing import Dict
 
-from utils.constants import DEVI_POSTED, QUEUE_TAG_MAPPING, TWIT_POSTED
+from utils.constants import DEVI_POSTED, QUEUE_TAG_MAPPING, POSTED_TAG_MAPPING, TWIT_POSTED
 
 
 def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
@@ -59,17 +59,15 @@ def rename_json_if_exists(filepath: str, new_filepath: str):
         print(f"No corresponding JSON file found for {filepath}")
 
 
-def exclude_files(files):
-    # todo only filter active platforms
-    return [f for f in files if (TWIT_POSTED not in f) and (DEVI_POSTED not in f)]
+def exclude_files(files, platforms):
+    excluded_tags = [POSTED_TAG_MAPPING[platform] for platform in platforms]
+    return [f for f in files if not any(tag in f for tag in excluded_tags)]
 
 
-# Based on the provided glob path, and whitelisted extensions
-# Find the files matching said pattern
-def find_images_in_folder(folder_path, extensions):
+def find_images_in_folder(folder_path, extensions, platforms):
     image_paths = []
     for ext in extensions:
         files = glob.glob(os.path.join(folder_path, f"*{ext}"))
-        filtered_files = exclude_files(files)
+        filtered_files = exclude_files(files, platforms)
         image_paths.extend(filtered_files)
     return image_paths
