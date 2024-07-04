@@ -3,6 +3,9 @@ __pycache__/
 .stfolder
 .stignore
 /accounts.yml
+Lib
+Scripts
+pyvenv.cfg
 
 refresh_token_cache/*
 !refresh_token_cache/.keep
