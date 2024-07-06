@@ -80,7 +80,7 @@ class TestDeviantClient(unittest.TestCase):
 
             DeviantClient(get_fake_account()).schedule("tests/fixtures/test.jpg", "some caption")
 
-            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=false&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=True&tags="
+            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=false&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true&tags="
             self.assertEqual(req_mock.request_history[2].text, expected)
 
     def test_post_image_sends_correct_payload_to_submit_with_nsfw_on(self):
@@ -92,7 +92,7 @@ class TestDeviantClient(unittest.TestCase):
 
             DeviantClient(get_fake_account({"nsfw": True})).schedule("tests/fixtures/test.jpg", "some caption")
 
-            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=True&tags="
+            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true&tags="
             self.assertEqual(req_mock.request_history[2].text, expected)
 
     def test_post_image_sends_correct_payload_to_publish_with_gallery_id_set(self):
@@ -105,7 +105,7 @@ class TestDeviantClient(unittest.TestCase):
             account = get_fake_account({"deviant": {"gallery_ids": ["123", "456"], "featured": False}})
             DeviantClient(account).schedule("tests/fixtures/test.jpg", "some caption")
 
-            expected_feature = "feature=False"
+            expected_feature = "feature=false"
             expected_gallery_ids = "galleryids=123&galleryids=456"
             self.assertIn(expected_feature, req_mock.request_history[2].text)
             self.assertIn(expected_gallery_ids, req_mock.request_history[2].text)
