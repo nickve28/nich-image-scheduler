@@ -16,13 +16,8 @@ def get_fake_account(partial: Dict[str, any] = {}):
         "directory_path": ".",
         "extensions": ["jpg"],
         "platforms": ["Deviant"],
-        "deviant": {
-            "client_id": 123,
-            "client_secret": 456,
-            "default_mature_classification": "",
-            "featured": True
-        },
-        "nsfw": False
+        "deviant": {"client_id": 123, "client_secret": 456, "default_mature_classification": "", "featured": True},
+        "nsfw": False,
     }
 
     if "deviant" in partial:
@@ -107,7 +102,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
 
-            account = get_fake_account({"deviant": { "gallery_ids": ["123", "456"], "featured": False} })
+            account = get_fake_account({"deviant": {"gallery_ids": ["123", "456"], "featured": False}})
             DeviantClient(account).schedule("tests/fixtures/test.jpg", "some caption")
 
             expected_feature = "feature=False"

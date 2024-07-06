@@ -12,6 +12,7 @@ from utils.file_utils import replace_file_tag
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import select_account
 
+
 def execute(account: Account, mode: str):
     debugging = mode == "Debug"
 
@@ -19,32 +20,26 @@ def execute(account: Account, mode: str):
         err = f"Please provide a valid mode. Choices are: {list(account.platforms)}"
         raise ValueError(err)
 
-
     def read_from(dict, key, fallback):
         if debugging:
             return fallback
         return dict[key]
 
-
     tag = read_from(TAG_MAPPING, mode, "TWIT")
     queued_tag = read_from(QUEUE_TAG_MAPPING, mode, "TWIT_Q")
     posted_tag = read_from(POSTED_TAG_MAPPING, mode, "TWIT_P")
-
 
     def find_random_image_in_folder(folder_path):
         image_paths: "list[str]" = []
 
         for ext in account.extensions:
             file_with_ext = f"*{queued_tag}*{ext}"
-            path = os.path.abspath(
-                os.path.join(folder_path, file_with_ext)
-            )
+            path = os.path.abspath(os.path.join(folder_path, file_with_ext))
 
             image_paths.extend(glob.glob(path))
         if len(image_paths) == 0:
             return None
         return random.sample(image_paths, 1)[0]
-
 
     file = find_random_image_in_folder(account.directory_path)
 
@@ -53,7 +48,6 @@ def execute(account: Account, mode: str):
         raise ValueError(err)
 
     caption = ImageMetadataAdjuster(file).get_caption()
-
 
     def run():
         if mode == "Twitter":
@@ -68,7 +62,6 @@ def execute(account: Account, mode: str):
         print(f"Mode {mode} not recognized")
         return False
 
-
     result = run()
     if result is not False:
         new_filepath = replace_file_tag(file, queued_tag, posted_tag)
@@ -80,6 +73,7 @@ def execute(account: Account, mode: str):
         return result
     else:
         print(f"Upload failed. Halted on {file}")
+
 
 if __name__ == "__main__":
     args = parse_arguments()
