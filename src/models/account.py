@@ -66,7 +66,7 @@ class DeviantPlatformConfig(PlatformConfig):
         self.client_secret = config["client_secret"]
         self.default_mature_classification = config.get("mature_classification", "")
         self.refresh_token = get_refresh_token(id)
-        self.featured = config["featured"]
+        self.featured = config.get("featured", True)
         self.gallery_ids = config.get("gallery_ids", [])
 
 

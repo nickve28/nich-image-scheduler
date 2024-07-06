@@ -74,6 +74,13 @@ class TestAccount(unittest.TestCase):
         result = parse_account(config)
         self.assertEqual(result.deviant_config.featured, True)
 
+    def test_sets_deviant_featured_true_by_default(self):
+        deviant = sample_deviant_config()
+        del deviant["featured"]
+        config = sample_config({"nsfw": True, "id": "test_account2", "deviant": deviant})
+        result = parse_account(config)
+        self.assertEqual(result.deviant_config.featured, True)
+
     def test_sets_deviant_galleries_empty_by_default(self):
         config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
         result = parse_account(config)
