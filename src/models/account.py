@@ -57,6 +57,8 @@ class DeviantPlatformConfig(PlatformConfig):
     client_secret: str
     default_mature_classification: str
     refresh_token: str
+    featured: bool
+    gallery_ids: "list[str]"
 
     def __init__(self, id, config):
         self.id = id
@@ -64,6 +66,8 @@ class DeviantPlatformConfig(PlatformConfig):
         self.client_secret = config["client_secret"]
         self.default_mature_classification = config.get("mature_classification", "")
         self.refresh_token = get_refresh_token(id)
+        self.featured = config["featured"]
+        self.gallery_ids = config.get("gallery_ids", [])
 
 
 PLATFORM_CLASS_BY_NAME = {SupportedPlatforms.DEVIANT: DeviantPlatformConfig, SupportedPlatforms.TWITTER: TwitterPlatformConfig}

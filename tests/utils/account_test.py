@@ -31,7 +31,7 @@ def sample_config(partial: Dict[str, any] = {}):
             "client_secret": 456,
             "default_mature_classification": "",
             "refresh_token": None,
-            "galleries": {"featured": "Featured", "123": "My Galleria"},
+            "featured": True
         },
     }
     config.update(partial)
@@ -39,7 +39,7 @@ def sample_config(partial: Dict[str, any] = {}):
 
 
 def sample_deviant_config():
-    return {"client_id": "c1", "client_secret": "c2"}
+    return {"client_id": "c1", "client_secret": "c2", "featured": True}
 
 
 class TestAccount(unittest.TestCase):
@@ -74,3 +74,13 @@ class TestAccount(unittest.TestCase):
         config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
         result = parse_account(config)
         self.assertEqual(result.deviant_config.refresh_token, None)
+
+    def test_sets_deviant_featured(self):
+        config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
+        result = parse_account(config)
+        self.assertEqual(result.deviant_config.featured, True)
+
+    def test_sets_deviant_galleries_empty_by_default(self):
+        config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
+        result = parse_account(config)
+        self.assertEqual(result.deviant_config.gallery_ids, [])
