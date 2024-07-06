@@ -103,7 +103,7 @@ class DeviantClient:
             response = requests.post(SUBMIT_URL, headers=headers, data=publish_data)
             submit_response = response.json()
             print("Submit response", submit_response)
-            return True
+            return submit_response
         except Exception as e:
             print(f"Error while attempting to upload to Deviant: {e}")
             return False

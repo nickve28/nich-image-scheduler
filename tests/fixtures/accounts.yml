@@ -1,7 +1,7 @@
 my_account:
   version: 1
   id: my_account
-  directory_path: /my-pictures/**/posted
+  directory_path: ./tests/fixtures
   extensions:
     - jpg
     - jpeg
