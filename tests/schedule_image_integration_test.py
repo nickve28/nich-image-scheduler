@@ -1,13 +1,11 @@
 from collections import namedtuple
 import os
 import random
-from typing import Dict
 import unittest
 from unittest.mock import Mock, patch
 import uuid
 from schedule_image import execute
 from utils.account_loader import select_account
-from utils.image_metadata_adjuster import ImageMetadataAdjuster
 import tweepy
 import requests_mock
 from src.clients.deviant import SUBMIT_URL, TOKEN_URL, UPLOAD_URL
