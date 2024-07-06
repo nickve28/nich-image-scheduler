@@ -38,10 +38,10 @@ class TestDeviantClient(unittest.TestCase):
         with requests_mock.Mocker() as req_mock:
             req_mock.post(TOKEN_URL, json={"refresh_token": "12345", "access_token": "acc123"})
             req_mock.post(UPLOAD_URL, json={"itemid": "1"})
-            req_mock.post(SUBMIT_URL, json={})
+            req_mock.post(SUBMIT_URL, json={"id": "123"})
             client = DeviantClient(get_fake_account())
 
-            assert client.schedule("tests/fixtures/test.jpg", "some caption") == True
+            assert client.schedule("tests/fixtures/test.jpg", "some caption") == {"id": "123"}
 
     def test_post_image_successfully_writes_refresh_token(self):
         with requests_mock.Mocker() as req_mock:
