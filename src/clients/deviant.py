@@ -95,6 +95,8 @@ class DeviantClient:
                 "is_ai_generated": "true",
                 "allow_free_download": "false",
                 "display_resolution": DEVI_ORIGINAL_DISPLAY_RESOLUTION,
+                "feature": self.account.deviant_config.featured,
+                "galleryids": self.account.deviant_config.gallery_ids,
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
                 "tags": "",
             }

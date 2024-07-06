@@ -3,6 +3,7 @@ __pycache__/
 .stfolder
 .stignore
 /accounts.yml
+/accounts*.yml
 Lib
 Scripts
 pyvenv.cfg
