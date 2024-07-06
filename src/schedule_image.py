@@ -5,13 +5,14 @@ import random
 import clients.deviant
 import clients.twitter
 import clients.test
+from models.account import Account
 from utils.cli_args import parse_arguments
 from utils.constants import POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING, TAG_MAPPING
 from utils.file_utils import replace_file_tag
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import select_account
 
-def execute(account, mode):
+def execute(account: Account, mode: str):
     debugging = mode == "Debug"
 
     if ((mode is None) or (mode not in account.platforms)) and (not debugging):
