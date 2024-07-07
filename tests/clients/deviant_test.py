@@ -106,5 +106,5 @@ class TestDeviantClient(unittest.TestCase):
             caption = "This caption is way beyond the length of 50 characters"
             DeviantClient(get_fake_account()).schedule("tests/fixtures/test.jpg", caption)
 
-            expected = f"title={caption[:50].replace(" ", "+")}"
-            self.assertIn(expected, req_mock.request_history[2].text)
+            self.assertIn(f"{caption[:50]}\r\n", req_mock.request_history[1].body.decode('latin1'))
+            self.assertIn(f"title={caption[:50].replace(" ", "+")}", req_mock.request_history[2].text)
