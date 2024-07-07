@@ -2,6 +2,7 @@ from typing import Dict
 import unittest
 from unittest.mock import mock_open, patch
 import uuid
+import urllib.parse
 
 from models.account import Account
 from src.deviant_utils.deviant_refresh_token import get_refresh_token
@@ -94,3 +95,16 @@ class TestDeviantClient(unittest.TestCase):
 
             expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&tags="
             self.assertEqual(req_mock.request_history[2].text, expected)
+
+    def test_post_image_sends_truncates_title_length(self):
+        with requests_mock.Mocker() as req_mock:
+            random_token = str(uuid.uuid4())
+            req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
+            req_mock.post(SUBMIT_URL, json={})
+
+            caption = "This caption is way beyond the length of 50 characters"
+            DeviantClient(get_fake_account()).schedule("tests/fixtures/test.jpg", caption)
+
+            expected = f"title={caption[:50].replace(" ", "+")}"
+            self.assertIn(expected, req_mock.request_history[2].text)
