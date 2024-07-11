@@ -1,6 +1,7 @@
 import random
+import os
 import sys
-from typing import Dict
+from typing import Dict, List
 
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import (
@@ -24,9 +25,13 @@ from utils.file_utils import find_images_in_folder, rename_file_with_tags
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import select_account
 
-
-account_data = parse_arguments().account
+args = parse_arguments()
+account_data = args.account
 account = select_account(account_data)
+
+sort = args.sort
+limit = args.limit
+skip_queued = args.skip_queued
 
 
 class Scheduler(QMainWindow):
@@ -35,15 +40,21 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: "list[str]" = find_images_in_folder(account.directory_path, account.extensions, account.platforms)
-        random.shuffle(self._images)
+        self._images: List[str] = find_images_in_folder(account.directory_path, account.extensions, account.platforms, skip_queued=skip_queued)
 
         if len(self._images) == 0:
             err = f"No images found for account {account.id} using pattern {account.directory_path}"
             raise RuntimeError(err)
 
-        # sort them
-        self._images.sort()
+        if sort == "random":
+            random.shuffle(self._images)
+        elif sort == "latest":
+            self._images.sort(key=lambda x: os.path.getctime(x), reverse=True)
+        else:
+            self._images.sort()
+
+        if limit is not None and limit < len(self._images):
+            self._images = self._images[:limit]
 
         # prepare the window
         self.setup_window()
