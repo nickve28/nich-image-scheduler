@@ -161,7 +161,7 @@ class Scheduler(QMainWindow):
             button.setIcon(QIcon(image))
             button.setIconSize(QSize(200, 200))
             button.setFixedSize(200, 200)
-            button.clicked.connect(lambda checked, image=image: self.change_image(image, index))
+            button.clicked.connect(lambda checked, i=index: self.change_image(self._images[i], i))
             image_selector_layout.addWidget(button)
 
         image_selector_layout.addStretch()
@@ -211,6 +211,14 @@ class Scheduler(QMainWindow):
         # Make sure the name is updated for subsequent saves
         self._current_image = new_filename
         self._images[self._current_index] = new_filename
+
+        self.update_image_selector_button(self._current_index, new_filename)
+
+    def update_image_selector_button(self, index: int, new_filename: str) -> None:
+        image_selector_widget = self._image_selector_area.widget()
+        image_selector_layout = image_selector_widget.layout()
+        button = image_selector_layout.itemAt(index).widget()
+        button.setIcon(QIcon(new_filename))
 
 
 if __name__ == "__main__":
