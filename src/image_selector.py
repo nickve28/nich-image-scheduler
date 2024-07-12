@@ -154,9 +154,11 @@ class Scheduler(QMainWindow):
         # right layout
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(10, 10, 10, 10)
-        right_layout.addSpacing(20)
-        right_layout.addWidget(target_widget, Qt.AlignTop)
+
+        # Add a stretch at the top to push the content to the bottom
         right_layout.addStretch()
+
+        right_layout.addWidget(target_widget, Qt.AlignTop)
 
         # create widget for the right layout
         right_widget = QWidget()
