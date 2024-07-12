@@ -1,5 +1,6 @@
 import random
 import os
+import subprocess
 import sys
 from typing import Dict, List
 
@@ -83,9 +84,17 @@ class Scheduler(QMainWindow):
         self._submit_button.clicked.connect(self.submit_callback)
 
         # filepath display
+        filepath_layout = QHBoxLayout()
         self._filepath_display = QLineEdit()
         self._filepath_display.setReadOnly(True)
         self._filepath_display.setPlaceholderText("File path will be displayed here")
+
+        self._locate_button = QPushButton("locate")
+        self._locate_button.clicked.connect(self.locate_file)
+        self._locate_button.setToolTip("Locate file in explorer")
+
+        filepath_layout.addWidget(self._filepath_display)
+        filepath_layout.addWidget(self._locate_button)
 
         # image selector
         self._image_selector_area = QScrollArea()
@@ -135,7 +144,7 @@ class Scheduler(QMainWindow):
         central_layout.addWidget(self._image)
         central_layout.addWidget(self._caption)
         central_layout.addWidget(self._submit_button)
-        central_layout.addWidget(self._filepath_display)
+        central_layout.addLayout(filepath_layout)
         central_layout.addStretch()
 
         # create widget for the central layout
@@ -242,6 +251,22 @@ class Scheduler(QMainWindow):
         image_selector_layout = image_selector_widget.layout()
         button = image_selector_layout.itemAt(index).widget()
         button.setIcon(QIcon(new_filename))
+
+    def locate_file(self):
+        if not self._current_image:
+            return
+
+        file_path = os.path.abspath(self._current_image)
+        if not os.path.exists(file_path):
+            return
+
+        if os.name == "nt":  # For Windows
+            subprocess.run(["explorer", "/select,", file_path])
+        elif os.name == "posix":  # For macOS and Linux
+            if sys.platform == "darwin":  # macOS
+                subprocess.run(["open", "-R", file_path])
+            else:  # Linux
+                subprocess.run(["xdg-open", os.path.dirname(file_path)])
 
 
 if __name__ == "__main__":
