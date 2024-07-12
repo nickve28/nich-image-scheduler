@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QSizePolicy,
 )
-from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap
+from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor
 
 from utils.cli_args import parse_arguments
 from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED
@@ -88,6 +88,12 @@ class Scheduler(QMainWindow):
         self._filepath_display = QLineEdit()
         self._filepath_display.setReadOnly(True)
         self._filepath_display.setPlaceholderText("File path will be displayed here")
+
+        # Style the filepath display to look more obviously read-only
+        palette = self._filepath_display.palette()
+        palette.setColor(QPalette.Base, QColor(240, 240, 240))  # Light grey background
+        palette.setColor(QPalette.Text, QColor(100, 100, 100))  # Darker grey text
+        self._filepath_display.setPalette(palette)
 
         self._locate_button = QPushButton("locate")
         self._locate_button.clicked.connect(self.locate_file)
