@@ -82,6 +82,11 @@ class Scheduler(QMainWindow):
         self._submit_button = QPushButton("Save")
         self._submit_button.clicked.connect(self.submit_callback)
 
+        # filepath display
+        self._filepath_display = QLineEdit()
+        self._filepath_display.setReadOnly(True)
+        self._filepath_display.setPlaceholderText("File path will be displayed here")
+
         # image selector
         self._image_selector_area = QScrollArea()
         self._image_selector_area.setWidgetResizable(True)
@@ -130,6 +135,7 @@ class Scheduler(QMainWindow):
         central_layout.addWidget(self._image)
         central_layout.addWidget(self._caption)
         central_layout.addWidget(self._submit_button)
+        central_layout.addWidget(self._filepath_display)
         central_layout.addStretch()
 
         # create widget for the central layout
@@ -211,6 +217,9 @@ class Scheduler(QMainWindow):
                 checkbox.setChecked((not posted_to_deviant) and queued_to_deviant)
                 checkbox.setEnabled(not posted_to_deviant)
 
+        # Update filepath display
+        self._filepath_display.setText(image)
+
     def submit_callback(self) -> None:
         caption = self._caption.text()
         adjuster = ImageMetadataAdjuster(self._current_image)
@@ -222,6 +231,9 @@ class Scheduler(QMainWindow):
         # Make sure the name is updated for subsequent saves
         self._current_image = new_filename
         self._images[self._current_index] = new_filename
+
+        # Update filepath display with the new filename
+        self._filepath_display.setText(new_filename)
 
         self.update_image_selector_button(self._current_index, new_filename)
 
