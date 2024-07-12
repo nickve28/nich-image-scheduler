@@ -17,11 +17,12 @@ from PyQt5.QtWidgets import (
     QApplication,
     QLineEdit,
     QSizePolicy,
+    QStatusBar,
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor
 
 from utils.cli_args import parse_arguments
-from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED
+from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED, POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING
 from utils.file_utils import find_images_in_folder, rename_file_with_tags
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import select_account
@@ -184,6 +185,10 @@ class Scheduler(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
+        # Add status bar
+        self._status_bar = QStatusBar()
+        self.setStatusBar(self._status_bar)
+
     def populate_image_selector(self) -> None:
         # create a layout for the image selector
         image_selector_layout = QVBoxLayout()
@@ -237,6 +242,9 @@ class Scheduler(QMainWindow):
         # Update filepath display
         self._filepath_display.setText(image)
 
+        # Update status bar with the current file name
+        self._status_bar.showMessage(self.generate_summary())
+
     def submit_callback(self) -> None:
         caption = self._caption.text()
         adjuster = ImageMetadataAdjuster(self._current_image)
@@ -251,6 +259,9 @@ class Scheduler(QMainWindow):
 
         # Update filepath display with the new filename
         self._filepath_display.setText(new_filename)
+
+        # Update status bar with the new file name
+        self._status_bar.showMessage(self.generate_summary())
 
         self.update_image_selector_button(self._current_index, new_filename)
 
@@ -275,6 +286,28 @@ class Scheduler(QMainWindow):
                 subprocess.run(["open", "-R", file_path])
             else:  # Linux
                 subprocess.run(["xdg-open", os.path.dirname(file_path)])
+
+    def generate_summary(self):
+        all_images = find_images_in_folder(account.directory_path, account.extensions, account.platforms, False, False)
+        total_images = len(all_images)
+        summary = {"Twitter": {"posted": 0, "queued": 0, "rest": 0}, "Deviant": {"posted": 0, "queued": 0, "rest": 0}}
+
+        for image in all_images:
+            for platform in account.platforms:
+                if POSTED_TAG_MAPPING[platform] in image:
+                    summary[platform]["posted"] += 1
+                elif QUEUE_TAG_MAPPING[platform] in image:
+                    summary[platform]["queued"] += 1
+                else:
+                    summary[platform]["rest"] += 1
+
+        summary_str = f"{account.directory_path}: {total_images} images."
+        for platform in account.platforms:
+            summary_str += (
+                f" {platform}: posted: {summary[platform]['posted']}, queued: {summary[platform]['queued']}, rest: {summary[platform]['rest']}"
+            )
+
+        return summary_str
 
 
 if __name__ == "__main__":
