@@ -68,7 +68,7 @@ class TestTwitterClient(unittest.TestCase):
             patch("tweepy.Client", return_value=self.mock_client),
         ):
             client = TwitterClient(get_fake_config())
-            assert client.schedule("tests/fixtures/test.jpg", "some caption") == True
+            self.assertEqual(client.schedule("tests/fixtures/test.jpg", "some caption"), TweetResponse(data={"id": "123"}))
 
     def test_post_with_cursive_text(self):
         with (

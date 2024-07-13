@@ -17,15 +17,15 @@ def get_fake_account(partial: Dict[str, any] = {}):
         "directory_path": ".",
         "extensions": ["jpg"],
         "platforms": ["Deviant"],
-        "deviant": {"client_id": 123, "client_secret": 456, "default_mature_classification": ""},
+        "deviant": {"client_id": 123, "client_secret": 456, "default_mature_classification": "", "featured": True},
         "nsfw": False,
     }
 
-    if "deviant_config" in partial:
-        config["deviant_config"].update(partial["deviant_config"])
-        config.update(partial)
+    if "deviant" in partial:
+        config["deviant"].update(partial["deviant"])
     if "nsfw" in partial:
         config["nsfw"] = partial["nsfw"]
+
     return Account(config)
 
 
@@ -34,10 +34,10 @@ class TestDeviantClient(unittest.TestCase):
         with requests_mock.Mocker() as req_mock:
             req_mock.post(TOKEN_URL, json={"refresh_token": "12345", "access_token": "acc123"})
             req_mock.post(UPLOAD_URL, json={"itemid": "1"})
-            req_mock.post(SUBMIT_URL, json={})
+            req_mock.post(SUBMIT_URL, json={"id": "123"})
             client = DeviantClient(get_fake_account())
 
-            assert client.schedule("tests/fixtures/test.jpg", "some caption") == True
+            assert client.schedule("tests/fixtures/test.jpg", "some caption") == {"id": "123"}
 
     def test_post_image_successfully_writes_refresh_token(self):
         with requests_mock.Mocker() as req_mock:
@@ -81,7 +81,7 @@ class TestDeviantClient(unittest.TestCase):
 
             DeviantClient(get_fake_account()).schedule("tests/fixtures/test.jpg", "some caption")
 
-            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=false&is_ai_generated=true&allow_free_download=false&display_resolution=0&tags="
+            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=false&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true&tags="
             self.assertEqual(req_mock.request_history[2].text, expected)
 
     def test_post_image_sends_correct_payload_to_submit_with_nsfw_on(self):
@@ -93,7 +93,7 @@ class TestDeviantClient(unittest.TestCase):
 
             DeviantClient(get_fake_account({"nsfw": True})).schedule("tests/fixtures/test.jpg", "some caption")
 
-            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&tags="
+            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true&tags="
             self.assertEqual(req_mock.request_history[2].text, expected)
 
     def test_post_image_sends_truncates_title_length(self):
@@ -102,9 +102,23 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
-
             caption = "This caption is way beyond the length of 50 characters"
-            DeviantClient(get_fake_account()).schedule("tests/fixtures/test.jpg", caption)
+            account = get_fake_account({"deviant": {"gallery_ids": ["123"], "featured": False}})
+            DeviantClient(account).schedule("tests/fixtures/test.jpg", caption)
 
             self.assertIn(f"{caption[:50]}\r\n", req_mock.request_history[1].body.decode("latin1"))
             self.assertIn(f"title={caption[:50].replace(' ', '+')}", req_mock.request_history[2].text)
+
+    def test_post_image_sends_correct_payload_to_publish_with_gallery_id_set(self):
+        with requests_mock.Mocker() as req_mock:
+            random_token = str(uuid.uuid4())
+            req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
+            req_mock.post(SUBMIT_URL, json={})
+            account = get_fake_account({"deviant": {"gallery_ids": ["123", "456"], "featured": False}})
+            DeviantClient(account).schedule("tests/fixtures/test.jpg", "some caption")
+
+            expected_feature = "feature=false"
+            expected_gallery_ids = "galleryids=123&galleryids=456"
+            self.assertIn(expected_feature, req_mock.request_history[2].text)
+            self.assertIn(expected_gallery_ids, req_mock.request_history[2].text)

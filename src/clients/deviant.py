@@ -102,13 +102,15 @@ class DeviantClient:
                 "is_ai_generated": "true",
                 "allow_free_download": "false",
                 "display_resolution": DEVI_ORIGINAL_DISPLAY_RESOLUTION,
+                "feature": "true" if self.account.deviant_config.featured else "false",
+                "galleryids": self.account.deviant_config.gallery_ids,
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
                 "tags": "",
             }
             response = requests.post(SUBMIT_URL, headers=headers, data=publish_data)
             submit_response = response.json()
             print("Submit response", submit_response)
-            return True
+            return submit_response
         except Exception as e:
             print(f"Error while attempting to upload to Deviant: {e}")
             return False

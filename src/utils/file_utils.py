@@ -59,15 +59,19 @@ def rename_json_if_exists(filepath: str, new_filepath: str):
         print(f"No corresponding JSON file found for {filepath}")
 
 
-def exclude_files(files, platforms):
-    excluded_tags = [POSTED_TAG_MAPPING[platform] for platform in platforms]
+def exclude_files(files, platforms, skip_queued, skip_posted=True):
+    excluded_tags = []
+    if skip_posted:
+        excluded_tags = [POSTED_TAG_MAPPING[platform] for platform in platforms]
+    if skip_queued:
+        excluded_tags.extend([QUEUE_TAG_MAPPING[platform] for platform in platforms])
     return [f for f in files if not any(tag in f for tag in excluded_tags)]
 
 
-def find_images_in_folder(folder_path, extensions, platforms):
+def find_images_in_folder(folder_path, extensions, platforms, skip_queued, skip_posted=True):
     image_paths = []
     for ext in extensions:
         files = glob.glob(os.path.join(folder_path, f"*{ext}"), recursive=True)
-        filtered_files = exclude_files(files, platforms)
+        filtered_files = exclude_files(files, platforms, skip_queued, skip_posted)
         image_paths.extend(filtered_files)
     return image_paths
