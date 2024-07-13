@@ -12,6 +12,13 @@ SUBMIT_URL = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
 
 # https://www.deviantart.com/developers/console/stash/stash_publish/a799a5c0967dca14e854286df9746793
 DEVI_ORIGINAL_DISPLAY_RESOLUTION = 0
+MAX_TITLE_LENGTH = 50
+
+
+def truncate_caption(caption: str):
+    if len(caption) <= MAX_TITLE_LENGTH:
+        return caption
+    return caption[:MAX_TITLE_LENGTH]
 
 
 class DeviantClient:
@@ -81,7 +88,7 @@ class DeviantClient:
 
             file_handle = open(stripped_image_path, "rb")
             files = {"file": file_handle}
-            data = {"title": caption, "artist_comments": "", "mature_content": mature_content, "is_ai_generated": "true"}
+            data = {"title": truncate_caption(caption), "artist_comments": "", "mature_content": mature_content, "is_ai_generated": "true"}
             response = requests.post(upload_url, headers=headers, files=files, data=data)
             json = response.json()
             print("Upload response", json)
@@ -89,7 +96,7 @@ class DeviantClient:
 
             publish_data = {
                 "itemid": json["itemid"],
-                "title": caption,
+                "title": truncate_caption(caption),
                 "artist_comments": "",
                 "is_mature": mature_content,
                 "is_ai_generated": "true",

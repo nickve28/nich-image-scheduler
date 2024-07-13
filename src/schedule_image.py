@@ -36,7 +36,7 @@ def execute(account: Account, mode: str):
             file_with_ext = f"*{queued_tag}*{ext}"
             path = os.path.abspath(os.path.join(folder_path, file_with_ext))
 
-            image_paths.extend(glob.glob(path))
+            image_paths.extend(glob.glob(path, recursive=True))
         if len(image_paths) == 0:
             return None
         return random.sample(image_paths, 1)[0]

@@ -2,6 +2,7 @@ from typing import Dict
 import unittest
 from unittest.mock import mock_open, patch
 import uuid
+import urllib.parse
 
 from models.account import Account
 from src.deviant_utils.deviant_refresh_token import get_refresh_token
@@ -95,13 +96,25 @@ class TestDeviantClient(unittest.TestCase):
             expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true&tags="
             self.assertEqual(req_mock.request_history[2].text, expected)
 
+    def test_post_image_sends_truncates_title_length(self):
+        with requests_mock.Mocker() as req_mock:
+            random_token = str(uuid.uuid4())
+            req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
+            req_mock.post(SUBMIT_URL, json={})
+            caption = "This caption is way beyond the length of 50 characters"
+            account = get_fake_account({"deviant": {"gallery_ids": ["123"], "featured": False}})
+            DeviantClient(account).schedule("tests/fixtures/test.jpg", caption)
+
+            self.assertIn(f"{caption[:50]}\r\n", req_mock.request_history[1].body.decode("latin1"))
+            self.assertIn(f"title={caption[:50].replace(' ', '+')}", req_mock.request_history[2].text)
+
     def test_post_image_sends_correct_payload_to_publish_with_gallery_id_set(self):
         with requests_mock.Mocker() as req_mock:
             random_token = str(uuid.uuid4())
             req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
-
             account = get_fake_account({"deviant": {"gallery_ids": ["123", "456"], "featured": False}})
             DeviantClient(account).schedule("tests/fixtures/test.jpg", "some caption")
 
