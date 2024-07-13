@@ -67,7 +67,7 @@ def exclude_files(files, platforms):
 def find_images_in_folder(folder_path, extensions, platforms):
     image_paths = []
     for ext in extensions:
-        files = glob.glob(os.path.join(folder_path, f"*{ext}"))
+        files = glob.glob(os.path.join(folder_path, f"*{ext}"), recursive=True)
         filtered_files = exclude_files(files, platforms)
         image_paths.extend(filtered_files)
     return image_paths

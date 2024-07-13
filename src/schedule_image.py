@@ -40,7 +40,7 @@ def find_random_image_in_folder(folder_path):
     for ext in account.extensions:
         file_with_ext = f"*{queued_tag}*{ext}"
         print(os.path.join(folder_path, file_with_ext))
-        image_paths.extend(glob.glob(os.path.join(folder_path, file_with_ext)))
+        image_paths.extend(glob.glob(os.path.join(folder_path, file_with_ext), recursive=True))
     if len(image_paths) == 0:
         return None
     return random.sample(image_paths, 1)[0]
