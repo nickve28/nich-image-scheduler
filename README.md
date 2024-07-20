@@ -36,7 +36,7 @@ Eg
 
 ```bash
 [Service]
-ExecStart=/home/nick/nich-image-scheduler/src/schedule_image.py nick twitter
+ExecStart=/home/nick/nich-image-scheduler/src/schedule_image.py nick Twitter
 ```
 
 ## Sub configs
