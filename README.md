@@ -5,6 +5,10 @@
 This tool allows for scheduling media posts to several platforms in an automated way, with configured presets. This can be combined with say, systemd or cron,
 to post at intervals. Mainly intended to allow friends to post their arts without worrying about the actual scheduling process.
 
+Currently supports
+- Deviant
+- Twitter
+
 Installation should be no more than `pip install -r requirements.txt` on the production machine, or `pip install -r requirements-dev.txt` when developing*
 
 * PyQT does not work on linux that easily, so the image picker deps are separated to `dev`
