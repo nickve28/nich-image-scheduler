@@ -50,6 +50,7 @@ def execute(account: Account, mode: str):
     caption = ImageMetadataAdjuster(file).get_caption()
 
     def run():
+        account.set_config_for(file)
         if mode == "Twitter":
             return clients.twitter.TwitterClient(account).schedule(file, caption)
 

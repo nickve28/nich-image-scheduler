@@ -1,4 +1,5 @@
-from typing import List, Optional
+import fnmatch
+from typing import Dict, List, Optional
 from enum import Enum
 
 from deviant_utils.deviant_refresh_token import get_refresh_token
@@ -73,6 +74,10 @@ class DeviantPlatformConfig(PlatformConfig):
 PLATFORM_CLASS_BY_NAME = {SupportedPlatforms.DEVIANT: DeviantPlatformConfig, SupportedPlatforms.TWITTER: TwitterPlatformConfig}
 
 
+def matches_path(config: Dict[str, any], path: str) -> bool:
+    return fnmatch.fnmatch(path, config["directory_path"])
+
+
 class Account:
     """Representation of the loaded account configuration"""
 
@@ -83,6 +88,7 @@ class Account:
     nsfw: bool
     twitter_config: Optional[TwitterPlatformConfig]
     deviant_config: Optional[DeviantPlatformConfig]
+    _config: Dict[str, any]
 
     def __init__(self, account_config):
         self.id = account_config["id"]
@@ -90,9 +96,28 @@ class Account:
         self.extensions = account_config["extensions"]
         self.platforms = account_config["platforms"]
         self.nsfw = account_config.get("nsfw", False)
+        self._config = account_config
 
         if SupportedPlatforms.DEVIANT.value in account_config:
             self.deviant_config = DeviantPlatformConfig(self.id, account_config[SupportedPlatforms.DEVIANT.value])
 
         if SupportedPlatforms.TWITTER.value in account_config:
             self.twitter_config = TwitterPlatformConfig(self.id, account_config[SupportedPlatforms.TWITTER.value])
+
+    def set_config_for(self, path):
+        """
+        Merges sub configs and creates an account configuration based on the given file path
+        This allows for generating specific configuration for folders, like adding specific tags
+        """
+        for sub_config in self._config["sub_configs"]:
+            if matches_path(sub_config, path):
+                self.nsfw = sub_config.get("nsfw", self.nsfw)
+
+                if self.deviant_config and "deviant" in sub_config:
+                    self._update_deviant_config(sub_config["deviant"])
+
+    def _update_deviant_config(self, deviant_sub_config: Dict[str, any]):
+        self.deviant_config.gallery_ids += deviant_sub_config.get("additional_gallery_ids", [])
+        self.deviant_config.default_mature_classification = deviant_sub_config.get(
+            "default_mature_classification", self.deviant_config.default_mature_classification
+        )
