@@ -1,5 +1,7 @@
 # Nich Image Scheduler
 
+![CI Status](https://github.com/nickve28/nich-image-scheduler/actions/workflows/python-tests.yml/badge.svg)
+
 This tool allows for scheduling media posts to several platforms in an automated way, with configured presets. This can be combined with say, systemd or cron,
 to post at intervals. Mainly intended to allow friends to post their arts without worrying about the actual scheduling process.
 
@@ -30,7 +32,7 @@ Eg
 
 ```bash
 [Service]
-ExecStart=/home/nick/nich-image-scheduler/schedule_image.py nick twitter
+ExecStart=/home/nick/nich-image-scheduler/src/schedule_image.py nick twitter
 ```
 
 ## Sub configs
