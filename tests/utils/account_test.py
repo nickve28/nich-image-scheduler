@@ -9,7 +9,7 @@ path = "tests/fixtures"
 def sample_config(partial: Dict[str, any] = {}):
     config = {
         "id": "my_account",
-        "directory_path": "/my-pictures/**/posted",
+        "directory_path": "./tests/fixtures",
         "extensions": ["jpg", "jpeg"],
         "platforms": ["Twitter", "Deviant"],
         "nsfw": False,
@@ -26,14 +26,26 @@ def sample_config(partial: Dict[str, any] = {}):
             "tag_count": 2,
             "tags": ["#AIart", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks"],
         },
-        "deviant_config": {"client_id": 123, "client_secret": 456, "default_mature_classification": "", "refresh_token": None, "featured": True},
+        "deviant_config": {
+            "client_id": 123,
+            "client_secret": 456,
+            "default_mature_classification": "",
+            "refresh_token": None,
+            "featured": True,
+        },
+        "sub_configs": [
+            {"directory_path": "./tests/fixtures/test", "nsfw": True, "deviant": {"default_mature_classification": "test"}},
+            {"directory_path": "./tests/fixtures/**/other", "deviant": {"additional_gallery_ids": ["123"]}},
+        ],
     }
     config.update(partial)
     return config
 
 
-def sample_deviant_config():
-    return {"client_id": "c1", "client_secret": "c2", "featured": True}
+def sample_deviant_config(partial={}):
+    config = {"client_id": "c1", "client_secret": "c2", "featured": True}
+    config.update(partial)
+    return config
 
 
 class TestAccount(unittest.TestCase):
@@ -85,3 +97,19 @@ class TestAccount(unittest.TestCase):
         config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
         result = parse_account(config)
         self.assertEqual(result.deviant_config.gallery_ids, [])
+
+    def test_allows_updating_config_based_on_rules_and_file_path(self):
+        config = sample_config({"nsfw": False, "id": "test_account2", "deviant": sample_deviant_config()})
+        result = parse_account(config)
+        result.set_config_for("./tests/fixtures/test/test.jpg")
+        self.assertEqual(result.nsfw, True)
+        self.assertEqual(result.deviant_config.default_mature_classification, "test")
+
+    def test_cascades_multiple_configs_on_multiple_matches(self):
+        deviant_config = sample_deviant_config({"gallery_ids": ["1"]})
+        config = sample_config({"nsfw": False, "id": "test_account2", "deviant": deviant_config})
+        result = parse_account(config)
+        result.set_config_for("./tests/fixtures/test/other/test.jpg")
+        self.assertEqual(result.nsfw, True)
+        self.assertEqual(result.deviant_config.default_mature_classification, "test")
+        self.assertEqual(result.deviant_config.gallery_ids, ["1", "123"])

@@ -75,7 +75,8 @@ PLATFORM_CLASS_BY_NAME = {SupportedPlatforms.DEVIANT: DeviantPlatformConfig, Sup
 
 
 def matches_path(config: Dict[str, any], path: str) -> bool:
-    return fnmatch.fnmatch(path, config["directory_path"])
+    pattern = f"{config['directory_path']}/*"
+    return fnmatch.fnmatch(path, pattern)
 
 
 class Account:
@@ -109,7 +110,7 @@ class Account:
         Merges sub configs and creates an account configuration based on the given file path
         This allows for generating specific configuration for folders, like adding specific tags
         """
-        for sub_config in self._config["sub_configs"]:
+        for sub_config in self._config.get("sub_configs", []):
             if matches_path(sub_config, path):
                 self.nsfw = sub_config.get("nsfw", self.nsfw)
 
