@@ -71,9 +71,10 @@ def execute(account: Account, mode: str):
         adjuster = ImageMetadataAdjuster(new_filepath)
         adjuster.add_tags(tag)
         adjuster.save()
-        return result
     else:
         print(f"Upload failed. Halted on {file}")
+
+    return result
 
 
 if __name__ == "__main__":
