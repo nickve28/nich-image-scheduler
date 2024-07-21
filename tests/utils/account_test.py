@@ -34,8 +34,14 @@ def sample_config(partial: Dict[str, any] = {}):
             "featured": True,
         },
         "sub_configs": [
-            {"directory_path": "./tests/fixtures/test", "nsfw": True, "deviant": {"default_mature_classification": "test"}},
-            {"directory_path": "./tests/fixtures/**/other", "deviant": {"additional_gallery_ids": ["123"]}},
+            {"directory_path": "./tests/fixtures/test", "nsfw": True, "deviant": {"default_mature_classification": "test", "featured": False}},
+            {
+                "directory_path": "./tests/fixtures/**/other",
+                "deviant": {
+                    "additional_gallery_ids": ["123"],
+                    "featured": True,
+                },
+            },
         ],
     }
     config.update(partial)
@@ -103,6 +109,7 @@ class TestAccount(unittest.TestCase):
         result = parse_account(config)
         result.set_config_for("./tests/fixtures/test/test.jpg")
         self.assertEqual(result.nsfw, True)
+        self.assertEqual(result.deviant_config.featured, False)
         self.assertEqual(result.deviant_config.default_mature_classification, "test")
 
     def test_cascades_multiple_configs_on_multiple_matches(self):
@@ -111,5 +118,6 @@ class TestAccount(unittest.TestCase):
         result = parse_account(config)
         result.set_config_for("./tests/fixtures/test/other/test.jpg")
         self.assertEqual(result.nsfw, True)
+        self.assertEqual(result.deviant_config.featured, True)
         self.assertEqual(result.deviant_config.default_mature_classification, "test")
         self.assertEqual(result.deviant_config.gallery_ids, ["1", "123"])

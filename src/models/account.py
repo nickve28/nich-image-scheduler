@@ -122,3 +122,4 @@ class Account:
         self.deviant_config.default_mature_classification = deviant_sub_config.get(
             "default_mature_classification", self.deviant_config.default_mature_classification
         )
+        self.deviant_config.featured = deviant_sub_config.get("featured", self.deviant_config.featured)
