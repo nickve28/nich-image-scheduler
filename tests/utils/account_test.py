@@ -13,7 +13,7 @@ def sample_config(partial: Dict[str, any] = {}):
         "extensions": ["jpg", "jpeg"],
         "platforms": ["Twitter", "Deviant"],
         "nsfw": False,
-        "twitter_config": {
+        "twitter": {
             "consumer_key": "t123",
             "consumer_secret": "t456",
             "bearer_token": "AAAAAAAAAAAAAAAAAAAAA",
@@ -26,7 +26,7 @@ def sample_config(partial: Dict[str, any] = {}):
             "tag_count": 2,
             "tags": ["#AIart", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks"],
         },
-        "deviant_config": {
+        "deviant": {
             "client_id": 123,
             "client_secret": 456,
             "default_mature_classification": "",
