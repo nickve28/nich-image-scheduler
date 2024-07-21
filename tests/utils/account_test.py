@@ -23,8 +23,8 @@ def sample_config(partial: Dict[str, any] = {}):
             "client_secret": "t22",
             "cursive_font": True,
             "tag_position": "prepend",
-            "tag_count": 2,
-            "tags": ["#AIart", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks"],
+            "random_tag_count": 2,
+            "random_tags": ["#AIart", "#AIArtwork", "#AIArtCommunity", "#AIArtGallery", "#AIArtworks"],
         },
         "deviant": {
             "client_id": 123,
@@ -34,13 +34,19 @@ def sample_config(partial: Dict[str, any] = {}):
             "featured": True,
         },
         "sub_configs": [
-            {"directory_path": "./tests/fixtures/test", "nsfw": True, "deviant": {"default_mature_classification": "test", "featured": False}},
+            {
+                "directory_path": "./tests/fixtures/test",
+                "nsfw": True,
+                "deviant": {"default_mature_classification": "test", "featured": False},
+                "twitter": {"additional_fixed_tags": ["#extra1", "#extra2"]},
+            },
             {
                 "directory_path": "./tests/fixtures/**/other",
                 "deviant": {
                     "additional_gallery_ids": ["123"],
                     "featured": True,
                 },
+                "twitter": {"additional_fixed_tags": ["#extra3"]},
             },
         ],
     }
@@ -110,6 +116,7 @@ class TestAccount(unittest.TestCase):
         result.set_config_for("./tests/fixtures/test/test.jpg")
         self.assertEqual(result.nsfw, True)
         self.assertEqual(result.deviant_config.featured, False)
+        self.assertEqual(result.twitter_config.fixed_tags, ["#extra1", "#extra2"])
         self.assertEqual(result.deviant_config.default_mature_classification, "test")
 
     def test_cascades_multiple_configs_on_multiple_matches(self):
@@ -121,3 +128,4 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(result.deviant_config.featured, True)
         self.assertEqual(result.deviant_config.default_mature_classification, "test")
         self.assertEqual(result.deviant_config.gallery_ids, ["1", "123"])
+        self.assertEqual(result.twitter_config.fixed_tags, ["#extra1", "#extra2", "#extra3"])
