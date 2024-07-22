@@ -90,12 +90,12 @@ class TestTwitterClient(unittest.TestCase):
             client.schedule("tests/fixtures/test.jpg", "some caption")
             self.mock_client.create_tweet.assert_called_once_with(text="#AIイラスト #AIArtworks some caption", media_ids=["1"])
 
-    def test_post_with_custom_tag_count(self):
+    def test_post_with_custom_random_tag_count(self):
         with (
             patch("tweepy.OAuthHandler", return_value=self.mock_oauth_handler),
             patch("tweepy.API", return_value=self.mock_api),
             patch("tweepy.Client", return_value=self.mock_client),
         ):
-            client = TwitterClient(get_fake_config({"twitter": {"tag_count": 3}}))
+            client = TwitterClient(get_fake_config({"twitter": {"random_tag_count": 3}}))
             client.schedule("tests/fixtures/test.jpg", "some caption")
             self.mock_client.create_tweet.assert_called_once_with(text="some caption #AIArtwork #AIイラスト #AIArtworks", media_ids=["1"])

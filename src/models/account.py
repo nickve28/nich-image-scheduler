@@ -25,10 +25,11 @@ class TwitterPlatformConfig(PlatformConfig):
     client_secret: str
     cursive_font: bool
     tag_position: str
-    tag_count: int
-    tags: List[str]
+    random_tag_count: int
+    random_tags: List[str]
+    fixed_tags: List[str]
 
-    DEFAULT_TAGS = [
+    DEFAULT_RANDOM_TAGS = [
         "#AIart",
         "#AIイラスト",
         "#AIArtwork",
@@ -49,8 +50,9 @@ class TwitterPlatformConfig(PlatformConfig):
         self.client_secret = config["client_secret"]
         self.cursive_font = config.get("cursive_font", False)
         self.tag_position = config.get("tag_position", "append")
-        self.tag_count = config.get("tag_count", 2)
-        self.tags = config.get("tags", self.DEFAULT_TAGS)
+        self.random_tag_count = config.get("random_tag_count", 2)
+        self.random_tags = config.get("random_tags", self.DEFAULT_RANDOM_TAGS)
+        self.fixed_tags = config.get("fixed_tags", [])
 
 
 class DeviantPlatformConfig(PlatformConfig):
@@ -117,8 +119,15 @@ class Account:
                 if self.deviant_config and "deviant" in sub_config:
                     self._update_deviant_config(sub_config["deviant"])
 
+                if self.twitter_config and "twitter" in sub_config:
+                    self._update_twitter_config(sub_config["twitter"])
+
     def _update_deviant_config(self, deviant_sub_config: Dict[str, any]):
         self.deviant_config.gallery_ids += deviant_sub_config.get("additional_gallery_ids", [])
         self.deviant_config.default_mature_classification = deviant_sub_config.get(
             "default_mature_classification", self.deviant_config.default_mature_classification
         )
+        self.deviant_config.featured = deviant_sub_config.get("featured", self.deviant_config.featured)
+
+    def _update_twitter_config(self, twitter_sub_config: Dict[str, any]):
+        self.twitter_config.fixed_tags += twitter_sub_config.get("additional_fixed_tags", [])

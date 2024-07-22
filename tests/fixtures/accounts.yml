@@ -19,8 +19,8 @@ my_account:
     client_secret: t22
     cursive_font: true
     tag_position: "prepend" # "append", default: "append"
-    tag_count: 2 # default: 2
-    tags: # optional, app contains a default
+    random_tag_count: 2 # default: 2
+    random_tags: # optional, app contains a default
       - "#AIart"
       - "#AIArtwork"
       - "#AIArtCommunity"
