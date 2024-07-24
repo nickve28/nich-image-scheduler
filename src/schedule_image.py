@@ -50,6 +50,7 @@ def execute(account: Account, mode: str):
     caption = ImageMetadataAdjuster(file).get_caption()
 
     def run():
+        account.set_config_for(file)
         if mode == "Twitter":
             return clients.twitter.TwitterClient(account).schedule(file, caption)
 
@@ -70,9 +71,10 @@ def execute(account: Account, mode: str):
         adjuster = ImageMetadataAdjuster(new_filepath)
         adjuster.add_tags(tag)
         adjuster.save()
-        return result
     else:
         print(f"Upload failed. Halted on {file}")
+
+    return result
 
 
 if __name__ == "__main__":

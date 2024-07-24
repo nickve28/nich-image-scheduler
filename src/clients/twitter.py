@@ -10,7 +10,11 @@ def decorate_caption(caption: str, config: TwitterPlatformConfig):
 
 
 def add_tags(caption: str, config: TwitterPlatformConfig):
-    combined_tags = " ".join(random.sample(config.tags, config.tag_count))
+    # Select random tags
+    random_tags = random.sample(config.random_tags, config.random_tag_count)
+    # Combine random tags and fixed tags
+    all_tags = random_tags + config.fixed_tags
+    combined_tags = " ".join(all_tags)
     if config.tag_position == "prepend":
         return f"{combined_tags} {caption}"
     return f"{caption} {combined_tags}"
