@@ -61,7 +61,8 @@ class DeviantPlatformConfig(PlatformConfig):
     default_mature_classification: str
     refresh_token: str
     featured: bool
-    gallery_ids: "list[str]"
+    gallery_ids: List[str]
+    tags: List[str]
 
     def __init__(self, id, config):
         self.id = id
@@ -71,6 +72,7 @@ class DeviantPlatformConfig(PlatformConfig):
         self.refresh_token = get_refresh_token(id)
         self.featured = config.get("featured", True)
         self.gallery_ids = config.get("gallery_ids", [])
+        self.tags = config.get("tags", [])
 
 
 PLATFORM_CLASS_BY_NAME = {SupportedPlatforms.DEVIANT: DeviantPlatformConfig, SupportedPlatforms.TWITTER: TwitterPlatformConfig}
@@ -124,6 +126,7 @@ class Account:
 
     def _update_deviant_config(self, deviant_sub_config: Dict[str, any]):
         self.deviant_config.gallery_ids += deviant_sub_config.get("additional_gallery_ids", [])
+        self.deviant_config.tags += deviant_sub_config.get("additional_tags", [])
         self.deviant_config.default_mature_classification = deviant_sub_config.get(
             "default_mature_classification", self.deviant_config.default_mature_classification
         )
