@@ -112,6 +112,7 @@ class DeviantClient:
                 "galleryids": self.account.deviant_config.gallery_ids,
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
             }
+            print("publish_data:", publish_data)
             response = requests.post(SUBMIT_URL, headers=headers, data=publish_data)
             submit_response = response.json()
             print("Submit response", submit_response)
