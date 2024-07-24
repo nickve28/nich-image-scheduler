@@ -95,6 +95,7 @@ class DeviantClient:
                 "is_ai_generated": "true",
                 "tags[]": self.account.deviant_config.tags,
             }
+            print(f"posting to {upload_url}, headers: {headers}, files: {files}, data: {data}")
             response = requests.post(upload_url, headers=headers, files=files, data=data)
             json = response.json()
             print("Upload response", json)
