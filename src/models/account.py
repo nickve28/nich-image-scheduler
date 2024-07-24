@@ -103,6 +103,9 @@ class Account:
         self.nsfw = account_config.get("nsfw", False)
         self._config = account_config
 
+        self.deviant_config = None
+        self.twitter_config = None
+
         if SupportedPlatforms.DEVIANT.value in account_config:
             self.deviant_config = DeviantPlatformConfig(self.id, account_config[SupportedPlatforms.DEVIANT.value])
 
