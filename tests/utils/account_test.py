@@ -37,7 +37,7 @@ def sample_config(partial: Dict[str, any] = {}):
             {
                 "directory_path": "./tests/fixtures/test",
                 "nsfw": True,
-                "deviant": {"default_mature_classification": "test", "featured": False},
+                "deviant": {"default_mature_classification": "test", "featured": False, "additional_tags": ["testtag"]},
                 "twitter": {"additional_fixed_tags": ["#extra1", "#extra2"]},
             },
             {
@@ -45,6 +45,7 @@ def sample_config(partial: Dict[str, any] = {}):
                 "deviant": {
                     "additional_gallery_ids": ["123"],
                     "featured": True,
+                    "additional_tags": ["othertesttag"],
                 },
                 "twitter": {"additional_fixed_tags": ["#extra3"]},
             },
@@ -111,16 +112,32 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(result.deviant_config.gallery_ids, [])
 
     def test_allows_updating_config_based_on_rules_and_file_path(self):
-        config = sample_config({"nsfw": False, "id": "test_account2", "deviant": sample_deviant_config()})
+        config = sample_config(
+            {
+                "nsfw": False,
+                "id": "test_account2",
+                "deviant": sample_deviant_config(
+                    {
+                        "tags": ["tag1", "tag2"],
+                    }
+                ),
+            }
+        )
         result = parse_account(config)
         result.set_config_for("./tests/fixtures/test/test.jpg")
         self.assertEqual(result.nsfw, True)
         self.assertEqual(result.deviant_config.featured, False)
+        self.assertEqual(result.deviant_config.tags, ["tag1", "tag2", "testtag"])
         self.assertEqual(result.twitter_config.fixed_tags, ["#extra1", "#extra2"])
         self.assertEqual(result.deviant_config.default_mature_classification, "test")
 
     def test_cascades_multiple_configs_on_multiple_matches(self):
-        deviant_config = sample_deviant_config({"gallery_ids": ["1"]})
+        deviant_config = sample_deviant_config(
+            {
+                "gallery_ids": ["1"],
+                "tags": ["tag1", "tag2"],
+            }
+        )
         config = sample_config({"nsfw": False, "id": "test_account2", "deviant": deviant_config})
         result = parse_account(config)
         result.set_config_for("./tests/fixtures/test/other/test.jpg")
@@ -128,4 +145,5 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(result.deviant_config.featured, True)
         self.assertEqual(result.deviant_config.default_mature_classification, "test")
         self.assertEqual(result.deviant_config.gallery_ids, ["1", "123"])
+        self.assertEqual(result.deviant_config.tags, ["tag1", "tag2", "testtag", "othertesttag"])
         self.assertEqual(result.twitter_config.fixed_tags, ["#extra1", "#extra2", "#extra3"])

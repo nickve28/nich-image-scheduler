@@ -88,7 +88,14 @@ class DeviantClient:
 
             file_handle = open(stripped_image_path, "rb")
             files = {"file": file_handle}
-            data = {"title": truncate_caption(caption), "artist_comments": "", "mature_content": mature_content, "is_ai_generated": "true"}
+            data = {
+                "title": truncate_caption(caption),
+                "artist_comments": "",
+                "mature_content": mature_content,
+                "is_ai_generated": "true",
+                "tags[]": self.account.deviant_config.tags,
+            }
+            print(f"posting to {upload_url}, headers: {headers}, files: {files}, data: {data}")
             response = requests.post(upload_url, headers=headers, files=files, data=data)
             json = response.json()
             print("Upload response", json)
@@ -105,8 +112,8 @@ class DeviantClient:
                 "feature": "true" if self.account.deviant_config.featured else "false",
                 "galleryids": self.account.deviant_config.gallery_ids,
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
-                "tags": "",
             }
+            print("publish_data:", publish_data)
             response = requests.post(SUBMIT_URL, headers=headers, data=publish_data)
             submit_response = response.json()
             print("Submit response", submit_response)
