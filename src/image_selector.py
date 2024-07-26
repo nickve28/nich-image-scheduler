@@ -23,7 +23,7 @@ from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor
 
 from utils.cli_args import parse_arguments
 from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED, POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING
-from utils.file_utils import find_images_in_folder, rename_file_with_tags
+from utils.file_utils import find_images_in_folders, rename_file_with_tags
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import select_account
 
@@ -42,10 +42,10 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: List[str] = find_images_in_folder(account.directory_path, account.extensions, account.platforms, skip_queued=skip_queued)
+        self._images: List[str] = find_images_in_folders(account.directory_paths, account.extensions, account.platforms, skip_queued=skip_queued)
 
         if len(self._images) == 0:
-            err = f"No images found for account {account.id} using pattern {account.directory_path}"
+            err = f"No images found for account {account.id} using patterns {account.directory_paths}"
             raise RuntimeError(err)
 
         if sort == "random":
@@ -288,7 +288,7 @@ class Scheduler(QMainWindow):
                 subprocess.run(["xdg-open", os.path.dirname(file_path)])
 
     def generate_summary(self):
-        all_images = find_images_in_folder(account.directory_path, account.extensions, account.platforms, False, False)
+        all_images = find_images_in_folders(account.directory_paths, account.extensions, account.platforms, False, False)
         total_images = len(all_images)
         summary = {"Twitter": {"posted": 0, "queued": 0, "rest": 0}, "Deviant": {"posted": 0, "queued": 0, "rest": 0}}
 
@@ -301,7 +301,9 @@ class Scheduler(QMainWindow):
                 else:
                     summary[platform]["rest"] += 1
 
-        summary_str = f"{account.directory_path}: {total_images} images."
+        summary_str = f"{account.directory_paths}: {total_images} images."
+        if len(account.directory_paths) > 1:
+            summary_str = f"Multiple configured paths: {total_images} images"
         for platform in account.platforms:
             summary_str += (
                 f" {platform}: posted: {summary[platform]['posted']}, queued: {summary[platform]['queued']}, rest: {summary[platform]['rest']}"

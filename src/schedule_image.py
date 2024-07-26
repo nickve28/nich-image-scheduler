@@ -41,10 +41,10 @@ def execute(account: Account, mode: str):
             return None
         return random.sample(image_paths, 1)[0]
 
-    file = find_random_image_in_folder(account.directory_path)
+    file = find_random_image_in_folder(account.directory_paths)
 
     if file is None:
-        err = f"No file found for glob: {account.directory_path} and extensions {', '.join(account.extensions)}"
+        err = f"No file found for glob: {account.directory_paths} and extensions {', '.join(account.extensions)}"
         raise ValueError(err)
 
     caption = ImageMetadataAdjuster(file).get_caption()
