@@ -7,7 +7,7 @@ import clients.deviant
 import clients.twitter
 import clients.test
 from models.account import Account
-from utils.cli_args import parse_arguments
+from utils.cli_args import parse_arguments, get_scheduler_profile_ids
 from utils.constants import POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING, TAG_MAPPING
 from utils.file_utils import replace_file_tag, find_images_in_folders
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
@@ -71,5 +71,6 @@ def execute(account: Account, mode: str):
 if __name__ == "__main__":
     args = parse_arguments()
     account_data = args.account
-    account = select_account(account_data)
+    scheduler_profile_ids = get_scheduler_profile_ids(args)
+    account = select_account(account_data, scheduler_profile_ids=scheduler_profile_ids)
     execute(account, args.mode)
