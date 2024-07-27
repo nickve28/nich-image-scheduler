@@ -98,6 +98,7 @@ def find_images_in_folder(folder_path: str, account: Account, skip_queued: bool,
     image_paths = []
     for ext in account.extensions:
         files = glob.glob(os.path.join(folder_path, f"*{ext}"), recursive=True)
+        files = [os.path.abspath(file) for file in files]
         filtered_files = exclude_files(files, account, skip_queued, skip_posted)
         image_paths.extend(filtered_files)
     return image_paths

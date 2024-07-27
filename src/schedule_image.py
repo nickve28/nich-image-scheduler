@@ -9,7 +9,7 @@ import clients.test
 from models.account import Account
 from utils.cli_args import parse_arguments
 from utils.constants import POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING, TAG_MAPPING
-from utils.file_utils import replace_file_tag
+from utils.file_utils import replace_file_tag, find_images_in_folders
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import select_account
 
@@ -30,25 +30,14 @@ def execute(account: Account, mode: str):
     queued_tag = read_from(QUEUE_TAG_MAPPING, mode, "TWIT_Q")
     posted_tag = read_from(POSTED_TAG_MAPPING, mode, "TWIT_P")
 
-    def find_random_image_in_folder(folder_paths: List[str]):
-        image_paths: "list[str]" = []
+    files = find_images_in_folders(account, skip_queued=False, skip_posted=True)
+    files = [file for file in files if queued_tag in file]
 
-        for folder_path in folder_paths:
-            for ext in account.extensions:
-                file_with_ext = f"*{queued_tag}*{ext}"
-                path = os.path.abspath(os.path.join(folder_path, file_with_ext))
-
-                image_paths.extend(glob.glob(path, recursive=True))
-            if len(image_paths) == 0:
-                return None
-        return random.sample(image_paths, 1)[0]
-
-    file = find_random_image_in_folder(account.directory_paths)
-
-    if file is None:
+    if len(files) == 0:
         err = f"No file found for glob: {account.directory_paths} and extensions {', '.join(account.extensions)}"
         raise ValueError(err)
 
+    file = random.sample(files, 1)[0]
     caption = ImageMetadataAdjuster(file).get_caption()
 
     def run():
