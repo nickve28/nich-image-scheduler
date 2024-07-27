@@ -21,9 +21,11 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor
 
+from clients.deviant import DeviantClient
+from clients.twitter import TwitterClient
 from utils.cli_args import parse_arguments, get_scheduler_profile_ids
 from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED, POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING
-from utils.file_utils import find_images_in_folders, rename_file_with_tags
+from utils.file_utils import find_images_in_folders, rename_file_with_tags, replace_file_tag
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import select_account
 
@@ -35,6 +37,31 @@ account = select_account(account_data, scheduler_profile_ids=scheduler_profile_i
 sort = args.sort
 limit = args.limit
 skip_queued = args.skip_queued
+
+
+def post_now(filename, mode):
+    account_copy = select_account(account_data, scheduler_profile_ids=scheduler_profile_ids)
+    account_copy.set_config_for(filename)
+    caption = ImageMetadataAdjuster(filename).get_caption() or ""
+
+    response = False
+    if mode == "Twitter":
+        response = TwitterClient(account_copy).schedule(filename, caption)
+
+    if mode == "Deviant":
+        response = DeviantClient(account_copy).schedule(filename, caption)
+
+    if response is not False:
+        queue_tag = QUEUE_TAG_MAPPING[mode]
+        post_tag = POSTED_TAG_MAPPING[mode]
+        new_filepath = replace_file_tag(filename, queue_tag, post_tag)
+
+        # image adjuster currently hold a file reference which blocks editing the name
+        adjuster = ImageMetadataAdjuster(new_filepath)
+        adjuster.add_tags(mode)
+        adjuster.save()
+        return new_filepath
+    return False
 
 
 class Scheduler(QMainWindow):
@@ -137,6 +164,32 @@ class Scheduler(QMainWindow):
             checkbox.setFixedHeight(20)
             target_layout.addWidget(checkbox)
             self._target_checkboxes.append(checkbox)
+
+        def post_image_now(target):
+            new_filename = post_now(self._current_image, target)
+
+            if new_filename is False:
+                raise RuntimeError("Error during saving")
+            # Make sure the name is updated for subsequent saves
+            self._current_image = new_filename
+            self._images[self._current_index] = new_filename
+
+            # Update filepath display with the new filename
+            self._filepath_display.setText(new_filename)
+
+            # Update status bar with the new file name
+            self._status_bar.showMessage(self.generate_summary())
+
+            self.update_image_selector_button(self._current_index, new_filename)
+
+        # add instant post buttons
+        for index, target in enumerate(self._targets):
+            button = QPushButton(f"Post now ({target})")
+            # todo
+            # post_tag = POSTED_TAG_MAPPING[target]
+            # button.setDisabled(post_tag in self._current_image)
+            button.clicked.connect(lambda state, index=index: post_image_now(self._targets[index]))  #
+            target_layout.addWidget(button)
 
         target_layout.addStretch()
 

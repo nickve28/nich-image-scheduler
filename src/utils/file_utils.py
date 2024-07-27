@@ -14,7 +14,11 @@ def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
     filename, file_extension = os.path.splitext(basename)
 
     # Construct the new filename
-    new_name = filename.replace(old_tag, new_tag)
+    new_name = None
+    if old_tag in filename:
+        new_name = filename.replace(old_tag, new_tag)
+    else:
+        new_name = f"{filename}{new_tag}"
     new_filename = f"{new_name}{file_extension}"
 
     new_filepath = os.path.join(directory, new_filename)
