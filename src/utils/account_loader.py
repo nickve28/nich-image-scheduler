@@ -8,10 +8,10 @@ parent_path = os.path.abspath(os.path.join(current_script_path, os.pardir))
 project_root = os.path.abspath(os.path.join(parent_path, ".."))
 
 
-def parse_account(account_data):
+def parse_account(account_data, scheduler_profile_ids):
     # Set up account data
     # This function shouldn't be used directly, but rather is exported for testing
-    return Account(account_data)
+    return Account(account_data, scheduler_profile_ids)
 
 
 def load_accounts(file_path=project_root):
@@ -19,7 +19,7 @@ def load_accounts(file_path=project_root):
     return yaml.safe_load(open(os.path.join(file_path, "accounts.yml")))
 
 
-def select_account(account_name: str, file_path=project_root):
+def select_account(account_name: str, file_path=project_root, scheduler_profile_ids=[]):
     # Selects a single account, fails if the account name can not be found
     accounts = load_accounts(file_path)
 
@@ -27,4 +27,4 @@ def select_account(account_name: str, file_path=project_root):
         err = f"Account {account_name} not known in list. Should be one of: {list(accounts.keys())}"
         raise ValueError(err)
 
-    return parse_account(accounts[account_name])
+    return parse_account(accounts[account_name], scheduler_profile_ids)

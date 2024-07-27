@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor
 
-from utils.cli_args import parse_arguments
+from utils.cli_args import parse_arguments, get_scheduler_profile_ids
 from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED, POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING
 from utils.file_utils import find_images_in_folders, rename_file_with_tags
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
@@ -29,7 +29,8 @@ from utils.account_loader import select_account
 
 args = parse_arguments()
 account_data = args.account
-account = select_account(account_data)
+scheduler_profile_ids = get_scheduler_profile_ids(args)
+account = select_account(account_data, scheduler_profile_ids=scheduler_profile_ids)
 
 sort = args.sort
 limit = args.limit
@@ -42,7 +43,7 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: List[str] = find_images_in_folders(account.directory_paths, account.extensions, account.platforms, skip_queued=skip_queued)
+        self._images: List[str] = find_images_in_folders(account, skip_queued=skip_queued)
 
         if len(self._images) == 0:
             err = f"No images found for account {account.id} using patterns {account.directory_paths}"
@@ -288,7 +289,7 @@ class Scheduler(QMainWindow):
                 subprocess.run(["xdg-open", os.path.dirname(file_path)])
 
     def generate_summary(self):
-        all_images = find_images_in_folders(account.directory_paths, account.extensions, account.platforms, False, False)
+        all_images = find_images_in_folders(account, False, False)
         total_images = len(all_images)
         summary = {"Twitter": {"posted": 0, "queued": 0, "rest": 0}, "Deviant": {"posted": 0, "queued": 0, "rest": 0}}
 

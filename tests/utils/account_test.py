@@ -75,40 +75,40 @@ class TestAccount(unittest.TestCase):
     def test_account_defaults_nsfw_to_false(self):
         config = sample_config()
         del config["nsfw"]
-        result = parse_account(config)
+        result = parse_account(config, [])
         self.assertEqual(result.nsfw, False)
 
     def test_account_allows_configuring_nsfw(self):
         config = sample_config({"nsfw": True})
-        result = parse_account(config)
+        result = parse_account(config, [])
         self.assertEqual(result.nsfw, True)
 
     def test_loads_deviant_refresh_token(self):
 
         config = sample_config({"nsfw": True, "id": "test_account", "deviant": sample_deviant_config()})
-        result = parse_account(config)
+        result = parse_account(config, [])
         self.assertEqual(result.deviant_config.refresh_token, "12345")
 
     def test_omits_deviant_token_if_not_found(self):
         config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
-        result = parse_account(config)
+        result = parse_account(config, [])
         self.assertEqual(result.deviant_config.refresh_token, None)
 
     def test_sets_deviant_featured(self):
         config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
-        result = parse_account(config)
+        result = parse_account(config, [])
         self.assertEqual(result.deviant_config.featured, True)
 
     def test_sets_deviant_featured_true_by_default(self):
         deviant = sample_deviant_config()
         del deviant["featured"]
         config = sample_config({"nsfw": True, "id": "test_account2", "deviant": deviant})
-        result = parse_account(config)
+        result = parse_account(config, [])
         self.assertEqual(result.deviant_config.featured, True)
 
     def test_sets_deviant_galleries_empty_by_default(self):
         config = sample_config({"nsfw": True, "id": "test_account2", "deviant": sample_deviant_config()})
-        result = parse_account(config)
+        result = parse_account(config, [])
         self.assertEqual(result.deviant_config.gallery_ids, [])
 
     def test_allows_updating_config_based_on_rules_and_file_path(self):
@@ -123,7 +123,7 @@ class TestAccount(unittest.TestCase):
                 ),
             }
         )
-        result = parse_account(config)
+        result = parse_account(config, [])
         result.set_config_for("./tests/fixtures/test/test.jpg")
         self.assertEqual(result.nsfw, True)
         self.assertEqual(result.deviant_config.featured, False)
@@ -139,7 +139,7 @@ class TestAccount(unittest.TestCase):
             }
         )
         config = sample_config({"nsfw": False, "id": "test_account2", "deviant": deviant_config})
-        result = parse_account(config)
+        result = parse_account(config, [])
         result.set_config_for("./tests/fixtures/test/other/test.jpg")
         self.assertEqual(result.nsfw, True)
         self.assertEqual(result.deviant_config.featured, True)

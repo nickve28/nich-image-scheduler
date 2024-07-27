@@ -13,4 +13,11 @@ def parse_arguments():
     )
     parser.add_argument("--limit", type=int, help="Limit the number of images to process")
     parser.add_argument("--skip-queued", action="store_true", help="Skip already queued images")
+    parser.add_argument("--scheduler-profile-ids", default=None, help="Open for specific schedule profiles")
     return parser.parse_args()
+
+
+def get_scheduler_profile_ids(args: argparse.Namespace):
+    if args.scheduler_profile_ids is not None:
+        return args.scheduler_profile_ids.split(",")
+    return []
