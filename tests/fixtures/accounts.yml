@@ -1,7 +1,8 @@
 my_account:
   version: 1
   id: my_account
-  directory_path: ./tests/fixtures
+  directory_paths:
+    primary: ./tests/fixtures
   extensions:
     - jpg
     - jpeg
