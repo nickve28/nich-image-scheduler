@@ -17,9 +17,10 @@ for platform in account.platforms:
 
     platform_count = 0
     for extension in account.extensions:
-        matches = glob.glob(os.path.join(account.directory_path, f"*{QUEUE_TAG_MAPPING[platform]}*{extension}"), recursive=True)
-        platform_count += len(matches)
-        for file_path in matches:
-            print(file_path)
+        for directory_path in account.directory_paths:
+            matches = glob.glob(os.path.join(directory_path, f"*{QUEUE_TAG_MAPPING[platform]}*{extension}"), recursive=True)
+            platform_count += len(matches)
+            for file_path in matches:
+                print(file_path)
     print(f"Total of {platform_count} files queued for platform {platform}")
     print("\n")

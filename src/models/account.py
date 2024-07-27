@@ -5,6 +5,12 @@ from enum import Enum
 from deviant_utils.deviant_refresh_token import get_refresh_token
 
 
+def get_directory_paths(config):
+    if "directory_paths" in config:
+        return config["directory_paths"]
+    return {"primary": config["directory_path"]}
+
+
 class SupportedPlatforms(Enum):
     TWITTER = "twitter"
     DEVIANT = "deviant"
@@ -87,7 +93,9 @@ class Account:
     """Representation of the loaded account configuration"""
 
     id: str
-    directory_path: str
+    # the named directory paths will become more relevant when scheduler profiles are implemented
+    named_directory_paths: Dict[str, str]
+    directory_paths: List[str]
     extensions: List[str]
     platforms: List[str]
     nsfw: bool
@@ -97,7 +105,8 @@ class Account:
 
     def __init__(self, account_config):
         self.id = account_config["id"]
-        self.directory_path = account_config["directory_path"]
+        self.named_directory_paths = get_directory_paths(account_config)
+        self.directory_paths = list(self.named_directory_paths.values())
         self.extensions = account_config["extensions"]
         self.platforms = account_config["platforms"]
         self.nsfw = account_config.get("nsfw", False)

@@ -75,3 +75,10 @@ def find_images_in_folder(folder_path, extensions, platforms, skip_queued, skip_
         filtered_files = exclude_files(files, platforms, skip_queued, skip_posted)
         image_paths.extend(filtered_files)
     return image_paths
+
+
+def find_images_in_folders(folder_paths, extensions, platforms, skip_queued, skip_posted=True):
+    result = []
+    for folder_path in folder_paths:
+        result += find_images_in_folder(folder_path, extensions, platforms, skip_queued, skip_posted)
+    return result

@@ -1,6 +1,7 @@
 import os
 import glob
 import random
+from typing import List
 
 import clients.deviant
 import clients.twitter
@@ -29,22 +30,23 @@ def execute(account: Account, mode: str):
     queued_tag = read_from(QUEUE_TAG_MAPPING, mode, "TWIT_Q")
     posted_tag = read_from(POSTED_TAG_MAPPING, mode, "TWIT_P")
 
-    def find_random_image_in_folder(folder_path):
+    def find_random_image_in_folder(folder_paths: List[str]):
         image_paths: "list[str]" = []
 
-        for ext in account.extensions:
-            file_with_ext = f"*{queued_tag}*{ext}"
-            path = os.path.abspath(os.path.join(folder_path, file_with_ext))
+        for folder_path in folder_paths:
+            for ext in account.extensions:
+                file_with_ext = f"*{queued_tag}*{ext}"
+                path = os.path.abspath(os.path.join(folder_path, file_with_ext))
 
-            image_paths.extend(glob.glob(path, recursive=True))
-        if len(image_paths) == 0:
-            return None
+                image_paths.extend(glob.glob(path, recursive=True))
+            if len(image_paths) == 0:
+                return None
         return random.sample(image_paths, 1)[0]
 
-    file = find_random_image_in_folder(account.directory_path)
+    file = find_random_image_in_folder(account.directory_paths)
 
     if file is None:
-        err = f"No file found for glob: {account.directory_path} and extensions {', '.join(account.extensions)}"
+        err = f"No file found for glob: {account.directory_paths} and extensions {', '.join(account.extensions)}"
         raise ValueError(err)
 
     caption = ImageMetadataAdjuster(file).get_caption()
