@@ -301,9 +301,12 @@ class Scheduler(QMainWindow):
                 else:
                     summary[platform]["rest"] += 1
 
-        summary_str = f"{account.directory_paths}: {total_images} images."
+        summary_str = ""
         if len(account.directory_paths) > 1:
-            summary_str = f"Multiple configured paths: {total_images} images"
+            summary_str += f"Multiple configured paths: {total_images} images"
+        else:
+            f"{account.directory_paths[0]}: {total_images} images."
+
         for platform in account.platforms:
             summary_str += (
                 f" {platform}: posted: {summary[platform]['posted']}, queued: {summary[platform]['queued']}, rest: {summary[platform]['rest']}"
