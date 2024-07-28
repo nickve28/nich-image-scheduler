@@ -12,10 +12,13 @@ class ImageMetadataAdjuster:
         # for now this is ok, all our content is utf-8
         return comment_bytes.decode("utf-8")
 
-    def read_metadata(self) -> hash:
+    def read_metadata(self) -> dict:
         image = Image.open(self.image_path)
         if not self.exif:
-            self.exif = piexif.load(image.info["exif"])
+            try:
+                self.exif = piexif.load(image.info["exif"])
+            except KeyError:
+                self.exif = {"0th": {}}
         return self.exif
 
     def get_caption(self) -> str:
