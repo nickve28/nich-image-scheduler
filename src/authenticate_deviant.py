@@ -20,7 +20,7 @@ app = Flask(__name__)
 
 PORT = 3000
 REDIRECT_URI = f"http://localhost:{PORT}/deviantart/callback"
-SCOPE = "stash publish"
+SCOPE = "stash publish browse"
 
 
 @app.route("/login")
