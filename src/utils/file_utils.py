@@ -4,7 +4,7 @@ import os
 from typing import Dict, List
 
 from models.account import Account
-from utils.constants import DEVI_POSTED, QUEUE_TAG_MAPPING, POSTED_TAG_MAPPING, TWIT_POSTED
+from utils.constants import QUEUE_TAG_MAPPING, POSTED_TAG_MAPPING
 
 
 def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
