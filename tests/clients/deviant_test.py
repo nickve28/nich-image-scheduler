@@ -2,7 +2,6 @@ from typing import Dict
 import unittest
 from unittest.mock import mock_open, patch
 import uuid
-import urllib.parse
 
 from models.account import Account
 from src.deviant_utils.deviant_refresh_token import get_refresh_token
