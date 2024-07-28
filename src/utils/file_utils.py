@@ -100,23 +100,23 @@ def is_excluded_file(account: Account, file: str, excluded_tags: List[str]):
     return excluded_via_scheduler_profile_exclusions(account, file) or excluded_via_scheduler_profile_paths(account, file) or excluded_via_tags
 
 
-def exclude_files(files: List[str], account: Account, skip_queued: bool, skip_posted=True):
-    excluded_tags = get_excluded_tags(account, skip_posted, skip_queued)
+def exclude_files(files: List[str], account: Account, excluded_tags: List[str]):
     return [file for file in files if not is_excluded_file(account, file, excluded_tags)]
 
 
-def find_images_in_folder(folder_path: str, account: Account, skip_queued: bool, skip_posted=True):
+def find_images_in_folder(folder_path: str, account: Account, excluded_tags: List[str]):
     image_paths = []
     for ext in account.extensions:
         files = glob.glob(os.path.join(folder_path, f"*{ext}"), recursive=True)
         files = [os.path.abspath(file) for file in files]
-        filtered_files = exclude_files(files, account, skip_queued, skip_posted)
+        filtered_files = exclude_files(files, account, excluded_tags)
         image_paths.extend(filtered_files)
     return image_paths
 
 
 def find_images_in_folders(account: Account, skip_queued: bool, skip_posted=True):
+    excluded_tags = get_excluded_tags(account, skip_posted, skip_queued)
     result = []
     for folder_path in account.directory_paths:
-        result += find_images_in_folder(folder_path, account, skip_queued, skip_posted)
+        result += find_images_in_folder(folder_path, account, excluded_tags)
     return result
