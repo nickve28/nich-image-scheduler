@@ -119,7 +119,7 @@ class DeviantClient:
                 "allow_free_download": "false",
                 "display_resolution": DEVI_ORIGINAL_DISPLAY_RESOLUTION,
                 "feature": "true" if self.account.deviant_config.featured else "false",
-                "galleryids": self.account.deviant_config.gallery_ids,
+                "galleryids[]": self.account.deviant_config.gallery_ids,
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
             }
             print("publish_data:", publish_data)
