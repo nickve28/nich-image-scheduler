@@ -2,7 +2,6 @@ from typing import Dict
 import unittest
 from unittest.mock import mock_open, patch
 import uuid
-import urllib.parse
 
 from models.account import Account
 from src.deviant_utils.deviant_refresh_token import get_refresh_token
@@ -119,6 +118,6 @@ class TestDeviantClient(unittest.TestCase):
             DeviantClient(account).schedule("tests/fixtures/test.jpg", "some caption")
 
             expected_feature = "feature=false"
-            expected_gallery_ids = "galleryids=123&galleryids=456"
+            expected_gallery_ids = "galleryids%5B%5D=123&galleryids%5B%5D=456"
             self.assertIn(expected_feature, req_mock.request_history[2].text)
             self.assertIn(expected_gallery_ids, req_mock.request_history[2].text)
