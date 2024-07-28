@@ -9,6 +9,7 @@ from models.account import Account
 TOKEN_URL = "https://www.deviantart.com/oauth2/token"
 UPLOAD_URL = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
 SUBMIT_URL = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
+FOLDERS_URL = "https://www.deviantart.com/api/v1/oauth2/gallery/folders"
 
 # https://www.deviantart.com/developers/console/stash/stash_publish/a799a5c0967dca14e854286df9746793
 DEVI_ORIGINAL_DISPLAY_RESOLUTION = 0
@@ -72,6 +73,14 @@ class DeviantClient:
 
         return temp_filename
 
+    def list_folders(self, username):
+        access_token = self._obtain_access_token()
+        print(f"Authenticated {access_token}")
+        payload = {"username": username, "limit": 50}
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = requests.get(FOLDERS_URL, params=payload, headers=headers)
+        return response.json()
+
     def schedule(self, image_path, caption):
         mature_content = "false" if self.account.nsfw is False else "true"
         stripped_image_path = None
@@ -110,7 +119,7 @@ class DeviantClient:
                 "allow_free_download": "false",
                 "display_resolution": DEVI_ORIGINAL_DISPLAY_RESOLUTION,
                 "feature": "true" if self.account.deviant_config.featured else "false",
-                "galleryids": self.account.deviant_config.gallery_ids,
+                "galleryids[]": self.account.deviant_config.gallery_ids,
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
             }
             print("publish_data:", publish_data)
