@@ -73,14 +73,6 @@ class DeviantClient:
 
         return temp_filename
 
-    def list_folders(self, username):
-        access_token = self._obtain_access_token()
-        print(f"Authenticated {access_token}")
-        payload = {"username": username, "limit": 50}
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = requests.get(FOLDERS_URL, params=payload, headers=headers)
-        return response.json()
-
     def schedule(self, image_path, caption):
         mature_content = "false" if self.account.nsfw is False else "true"
         stripped_image_path = None
