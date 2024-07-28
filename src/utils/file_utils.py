@@ -66,6 +66,7 @@ def rename_json_if_exists(filepath: str, new_filepath: str):
 
 
 def get_excluded_tags(account: Account, skip_posted: bool, skip_queued: bool):
+    # Get tags which will be excluded from the results
     excluded_tags = []
     if skip_posted:
         excluded_tags.extend([POSTED_TAG_MAPPING[platform] for platform in account.platforms])
@@ -79,12 +80,15 @@ def matches_path(file, pattern):
 
 
 def excluded_via_scheduler_profile_paths(account: Account, file: str):
+    # If none of the specified schedule profiles has a path that matches
+    # the file, exclude it
     if len(account.scheduler_profiles) == 0:
         return False
     return not any(matches_path(file, scheduler_profile.directory_path) for scheduler_profile in account.scheduler_profiles)
 
 
 def excluded_via_scheduler_profile_exclusions(account: Account, file: str):
+    # If the path is excluded explicitly via a schedule profile, exclude it
     if len(account.scheduler_profiles) == 0:
         return False
 
