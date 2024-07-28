@@ -30,4 +30,4 @@ print("\n")
 client = DeviantClient(account)
 response = client.list_folders(deviant_account_name)
 for folder in response["results"]:
-    print(f"{folder["name"]}: {folder["folderid"]}")
+    print(f"{folder['name']}: {folder['folderid']}")
