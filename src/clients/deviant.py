@@ -4,6 +4,7 @@ from PIL import Image
 import os
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
+from utils.text_utils import remove_duplicates
 from models.account import Account
 
 TOKEN_URL = "https://www.deviantart.com/oauth2/token"
@@ -97,12 +98,13 @@ class DeviantClient:
 
             file_handle = open(stripped_image_path, "rb")
             files = {"file": file_handle}
+            unique_tags = remove_duplicates(self.account.deviant_config.tags)
             data = {
                 "title": truncate_caption(caption),
                 "artist_comments": "",
                 "mature_content": mature_content,
                 "is_ai_generated": "true",
-                "tags[]": self.account.deviant_config.tags,
+                "tags[]": unique_tags,
             }
             print(f"posting to {upload_url}, headers: {headers}, files: {files}, data: {data}")
             response = requests.post(upload_url, headers=headers, files=files, data=data)

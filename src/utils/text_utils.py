@@ -4,3 +4,6 @@ def to_cursive(text):
 
     trans = str.maketrans(normal_map, cursive_map)
     return text.translate(trans)
+
+def remove_duplicates(string_array):
+    return list(dict.fromkeys(string_array))
