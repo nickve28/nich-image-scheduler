@@ -81,6 +81,7 @@ def matches_path(file, pattern):
 
 
 def is_included_via_scheduler_profile_paths(account: Account, file: str):
+    # If one directory path of the scheduler profile matches, include the item
     for scheduler_profile in account.scheduler_profiles:
         if matches_path(file, scheduler_profile.directory_path):
             return True
@@ -88,6 +89,7 @@ def is_included_via_scheduler_profile_paths(account: Account, file: str):
 
 
 def is_excluded_via_scheduler_profile_exclusions(account: Account, file: str):
+    # If one exclude path of the scheduler profile matches, exclude the item
     for scheduler_profile in account.scheduler_profiles:
         for exclude_path in scheduler_profile.exclude_paths:
             if matches_path(file, exclude_path):
