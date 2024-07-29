@@ -80,14 +80,14 @@ def matches_path(file, pattern):
     return fnmatch.fnmatch(file, f"{pattern}/*")
 
 
-def included_via_scheduler_profile_paths(account: Account, file: str):
+def is_included_via_scheduler_profile_paths(account: Account, file: str):
     for scheduler_profile in account.scheduler_profiles:
         if matches_path(file, scheduler_profile.directory_path):
             return True
     return False
 
 
-def excluded_via_scheduler_profile_exclusions(account: Account, file: str):
+def is_excluded_via_scheduler_profile_exclusions(account: Account, file: str):
     for scheduler_profile in account.scheduler_profiles:
         for exclude_path in scheduler_profile.exclude_paths:
             if matches_path(file, exclude_path):
@@ -96,19 +96,19 @@ def excluded_via_scheduler_profile_exclusions(account: Account, file: str):
 
 
 def is_excluded_file(account: Account, file: str, excluded_tags: List[str]):
-    excluded_via_tags = any(tag in file for tag in excluded_tags)
+    is_excluded_via_tags = any(tag in file for tag in excluded_tags)
 
-    if excluded_via_tags:
+    if is_excluded_via_tags:
         return True
 
     # No-op without scheduler profiles
     if len(account.scheduler_profiles) == 0:
         return False
 
-    if excluded_via_scheduler_profile_exclusions(account, file):
+    if is_excluded_via_scheduler_profile_exclusions(account, file):
         return True
 
-    return not included_via_scheduler_profile_paths(account, file)
+    return not is_included_via_scheduler_profile_paths(account, file)
 
 
 def exclude_files(files: List[str], account: Account, excluded_tags: List[str]):
