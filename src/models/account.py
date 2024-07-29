@@ -89,10 +89,18 @@ def matches_path(config: Dict[str, any], path: str) -> bool:
     return fnmatch.fnmatch(path, pattern)
 
 
+class SchedulerProfile:
+    def __init__(self, id, profile_config):
+        self.id = id
+        self.directory_path = profile_config["directory_path"]
+        self.exclude_paths = profile_config.get("exclude_paths", [])
+
+
 class Account:
     """Representation of the loaded account configuration"""
 
     id: str
+    scheduler_profiles: List[SchedulerProfile]
     # the named directory paths will become more relevant when scheduler profiles are implemented
     named_directory_paths: Dict[str, str]
     directory_paths: List[str]
@@ -103,7 +111,7 @@ class Account:
     deviant_config: Optional[DeviantPlatformConfig]
     _config: Dict[str, any]
 
-    def __init__(self, account_config):
+    def __init__(self, account_config, scheduler_profile_ids=[]):
         self.id = account_config["id"]
         self.named_directory_paths = get_directory_paths(account_config)
         self.directory_paths = list(self.named_directory_paths.values())
@@ -111,6 +119,10 @@ class Account:
         self.platforms = account_config["platforms"]
         self.nsfw = account_config.get("nsfw", False)
         self._config = account_config
+        self.scheduler_profiles = [
+            SchedulerProfile(scheduler_profile_id, account_config["scheduler_profiles"][scheduler_profile_id])
+            for scheduler_profile_id in scheduler_profile_ids
+        ]
 
         self.deviant_config = None
         self.twitter_config = None

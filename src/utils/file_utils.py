@@ -1,8 +1,11 @@
+import fnmatch
 import glob
+import itertools
 import os
-from typing import Dict
+from typing import Dict, List
 
-from utils.constants import DEVI_POSTED, QUEUE_TAG_MAPPING, POSTED_TAG_MAPPING, TWIT_POSTED
+from models.account import Account
+from utils.constants import QUEUE_TAG_MAPPING, POSTED_TAG_MAPPING
 
 
 def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
@@ -12,7 +15,11 @@ def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
     filename, file_extension = os.path.splitext(basename)
 
     # Construct the new filename
-    new_name = filename.replace(old_tag, new_tag)
+    new_name = None
+    if old_tag in filename:
+        new_name = filename.replace(old_tag, new_tag)
+    else:
+        new_name = f"{filename}{new_tag}"
     new_filename = f"{new_name}{file_extension}"
 
     new_filepath = os.path.join(directory, new_filename)
@@ -59,26 +66,70 @@ def rename_json_if_exists(filepath: str, new_filepath: str):
         print(f"No corresponding JSON file found for {filepath}")
 
 
-def exclude_files(files, platforms, skip_queued, skip_posted=True):
+def get_excluded_tags(account: Account, skip_posted: bool, skip_queued: bool):
+    # Get tags which will be excluded from the results
     excluded_tags = []
     if skip_posted:
-        excluded_tags = [POSTED_TAG_MAPPING[platform] for platform in platforms]
+        excluded_tags.extend([POSTED_TAG_MAPPING[platform] for platform in account.platforms])
     if skip_queued:
-        excluded_tags.extend([QUEUE_TAG_MAPPING[platform] for platform in platforms])
-    return [f for f in files if not any(tag in f for tag in excluded_tags)]
+        excluded_tags.extend([QUEUE_TAG_MAPPING[platform] for platform in account.platforms])
+    return excluded_tags
 
 
-def find_images_in_folder(folder_path, extensions, platforms, skip_queued, skip_posted=True):
+def matches_path(file, pattern):
+    return fnmatch.fnmatch(file, f"{pattern}/*")
+
+
+def is_included_via_scheduler_profile_paths(account: Account, file: str):
+    # If one directory path of the scheduler profile matches, include the item
+    for scheduler_profile in account.scheduler_profiles:
+        if matches_path(file, scheduler_profile.directory_path):
+            return True
+    return False
+
+
+def is_excluded_via_scheduler_profile_exclusions(account: Account, file: str):
+    # If one exclude path of the scheduler profile matches, exclude the item
+    for scheduler_profile in account.scheduler_profiles:
+        for exclude_path in scheduler_profile.exclude_paths:
+            if matches_path(file, exclude_path):
+                return True
+    return False
+
+
+def is_excluded_file(account: Account, file: str, excluded_tags: List[str]):
+    is_excluded_via_tags = any(tag in file for tag in excluded_tags)
+
+    if is_excluded_via_tags:
+        return True
+
+    # No-op without scheduler profiles
+    if len(account.scheduler_profiles) == 0:
+        return False
+
+    if is_excluded_via_scheduler_profile_exclusions(account, file):
+        return True
+
+    return not is_included_via_scheduler_profile_paths(account, file)
+
+
+def exclude_files(files: List[str], account: Account, excluded_tags: List[str]):
+    return [file for file in files if not is_excluded_file(account, file, excluded_tags)]
+
+
+def find_images_in_folder(folder_path: str, account: Account, excluded_tags: List[str]):
     image_paths = []
-    for ext in extensions:
+    for ext in account.extensions:
         files = glob.glob(os.path.join(folder_path, f"*{ext}"), recursive=True)
-        filtered_files = exclude_files(files, platforms, skip_queued, skip_posted)
+        files = [os.path.abspath(file) for file in files]
+        filtered_files = exclude_files(files, account, excluded_tags)
         image_paths.extend(filtered_files)
     return image_paths
 
 
-def find_images_in_folders(folder_paths, extensions, platforms, skip_queued, skip_posted=True):
+def find_images_in_folders(account: Account, skip_queued: bool, skip_posted=True):
+    excluded_tags = get_excluded_tags(account, skip_posted, skip_queued)
     result = []
-    for folder_path in folder_paths:
-        result += find_images_in_folder(folder_path, extensions, platforms, skip_queued, skip_posted)
+    for folder_path in account.directory_paths:
+        result += find_images_in_folder(folder_path, account, excluded_tags)
     return result
