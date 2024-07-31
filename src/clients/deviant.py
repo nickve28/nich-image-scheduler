@@ -92,6 +92,7 @@ class DeviantClient:
         mature_content = "false" if self.account.nsfw is False else "true"
         stripped_image_path = None
         file_handle = None
+        config = self.account.deviant_config
 
         try:
             access_token = self._obtain_access_token()
@@ -117,6 +118,7 @@ class DeviantClient:
             json = response.json()
             print("Upload response", json)
             # {'status': 'success', 'itemid': ---, 'stack': 'Sta.sh Uploads 90', 'stackid': ---}
+            can_be_featured = self.account.deviant_config.featured and len(config.premium_gallery_ids) == 0
 
             publish_data = {
                 "itemid": json["itemid"],
@@ -126,7 +128,7 @@ class DeviantClient:
                 "is_ai_generated": "true",
                 "allow_free_download": "false",
                 "display_resolution": DEVI_ORIGINAL_DISPLAY_RESOLUTION,
-                "feature": "true" if self.account.deviant_config.featured else "false",
+                "feature": "true" if can_be_featured else "false",
                 "galleryids[]": self._get_gallery_ids(),
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
             }

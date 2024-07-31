@@ -109,7 +109,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
-            loaded_account = account({"deviant": {"gallery_ids": ["123", "456"], "premium_gallery_ids": ["prem123"], "featured": False}})
+            loaded_account = account({"deviant": {"gallery_ids": ["123", "456"], "premium_gallery_ids": ["prem123"], "featured": True}})
             DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption")
 
             expected_feature = "feature=false"
