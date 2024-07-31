@@ -68,6 +68,7 @@ class DeviantPlatformConfig(PlatformConfig):
     refresh_token: str
     featured: bool
     gallery_ids: List[str]
+    premium_gallery_ids: List[str]
     tags: List[str]
 
     def __init__(self, id, config):
@@ -78,6 +79,7 @@ class DeviantPlatformConfig(PlatformConfig):
         self.refresh_token = get_refresh_token(id)
         self.featured = config.get("featured", True)
         self.gallery_ids = config.get("gallery_ids", [])
+        self.premium_gallery_ids = config.get("premium_gallery_ids", [])
         self.tags = config.get("tags", [])
 
 
@@ -138,17 +140,21 @@ class Account:
         Merges sub configs and creates an account configuration based on the given file path
         This allows for generating specific configuration for folders, like adding specific tags
         """
-        for sub_config in self._config.get("sub_configs", []):
-            if matches_path(sub_config, path):
-                self.nsfw = sub_config.get("nsfw", self.nsfw)
 
-                if self.deviant_config and "deviant" in sub_config:
-                    self._update_deviant_config(sub_config["deviant"])
+        matching_sub_configs = [sub_config for sub_config in self._config.get("sub_configs", []) if matches_path(sub_config, path)]
+        breakpoint()
+        for sub_config in matching_sub_configs:
+            self.nsfw = sub_config.get("nsfw", self.nsfw)
 
-                if self.twitter_config and "twitter" in sub_config:
-                    self._update_twitter_config(sub_config["twitter"])
+            if self.deviant_config and "deviant" in sub_config:
+                self._update_deviant_config(sub_config["deviant"])
+
+            if self.twitter_config and "twitter" in sub_config:
+                self._update_twitter_config(sub_config["twitter"])
 
     def _update_deviant_config(self, deviant_sub_config: Dict[str, any]):
+        breakpoint()
+        self.deviant_config.premium_gallery_ids += deviant_sub_config.get("additional_premium_gallery_ids", [])
         self.deviant_config.gallery_ids += deviant_sub_config.get("additional_gallery_ids", [])
         self.deviant_config.tags += deviant_sub_config.get("additional_tags", [])
         self.deviant_config.default_mature_classification = deviant_sub_config.get(
