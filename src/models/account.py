@@ -142,7 +142,6 @@ class Account:
         """
 
         matching_sub_configs = [sub_config for sub_config in self._config.get("sub_configs", []) if matches_path(sub_config, path)]
-        breakpoint()
         for sub_config in matching_sub_configs:
             self.nsfw = sub_config.get("nsfw", self.nsfw)
 
@@ -153,7 +152,6 @@ class Account:
                 self._update_twitter_config(sub_config["twitter"])
 
     def _update_deviant_config(self, deviant_sub_config: Dict[str, any]):
-        breakpoint()
         self.deviant_config.premium_gallery_ids += deviant_sub_config.get("additional_premium_gallery_ids", [])
         self.deviant_config.gallery_ids += deviant_sub_config.get("additional_gallery_ids", [])
         self.deviant_config.tags += deviant_sub_config.get("additional_tags", [])
