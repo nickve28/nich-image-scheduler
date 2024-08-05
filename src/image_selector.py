@@ -70,7 +70,7 @@ class Scheduler(QMainWindow):
         self.setWindowTitle("Scheduler")
 
         # load the list of images and save it as full paths
-        self._images: List[str] = find_images_in_folders(account, skip_queued=skip_queued)
+        self._images: List[str] = find_images_in_folders(account, account.platforms, skip_queued=skip_queued)
 
         if len(self._images) == 0:
             err = f"No images found for account {account.id} using patterns {account.directory_paths}"
@@ -342,7 +342,7 @@ class Scheduler(QMainWindow):
                 subprocess.run(["xdg-open", os.path.dirname(file_path)])
 
     def generate_summary(self):
-        all_images = find_images_in_folders(account, False, False)
+        all_images = find_images_in_folders(account, account.platforms, False, False)
         total_images = len(all_images)
         summary = {"Twitter": {"posted": 0, "queued": 0, "rest": 0}, "Deviant": {"posted": 0, "queued": 0, "rest": 0}}
 

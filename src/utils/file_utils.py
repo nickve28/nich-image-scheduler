@@ -66,13 +66,13 @@ def rename_json_if_exists(filepath: str, new_filepath: str):
         print(f"No corresponding JSON file found for {filepath}")
 
 
-def get_excluded_tags(account: Account, skip_posted: bool, skip_queued: bool):
+def get_excluded_tags(platforms: List[str], skip_posted: bool, skip_queued: bool):
     # Get tags which will be excluded from the results
     excluded_tags = []
     if skip_posted:
-        excluded_tags.extend([POSTED_TAG_MAPPING[platform] for platform in account.platforms])
+        excluded_tags.extend([POSTED_TAG_MAPPING[platform] for platform in platforms])
     if skip_queued:
-        excluded_tags.extend([QUEUE_TAG_MAPPING[platform] for platform in account.platforms])
+        excluded_tags.extend([QUEUE_TAG_MAPPING[platform] for platform in platforms])
     return excluded_tags
 
 
@@ -127,8 +127,8 @@ def find_images_in_folder(folder_path: str, account: Account, excluded_tags: Lis
     return image_paths
 
 
-def find_images_in_folders(account: Account, skip_queued: bool, skip_posted=True):
-    excluded_tags = get_excluded_tags(account, skip_posted, skip_queued)
+def find_images_in_folders(account: Account, platforms: List[str], skip_queued: bool, skip_posted=True):
+    excluded_tags = get_excluded_tags(platforms, skip_posted, skip_queued)
     result = []
     for folder_path in account.directory_paths:
         result += find_images_in_folder(folder_path, account, excluded_tags)
