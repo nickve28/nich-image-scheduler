@@ -30,7 +30,7 @@ def execute(account: Account, mode: str):
     queued_tag = read_from(QUEUE_TAG_MAPPING, mode, "TWIT_Q")
     posted_tag = read_from(POSTED_TAG_MAPPING, mode, "TWIT_P")
 
-    files = find_images_in_folders(account, [tag], skip_queued=False, skip_posted=True)
+    files = find_images_in_folders(account, [mode], skip_queued=False, skip_posted=True)
     files = [file for file in files if queued_tag in file]
 
     if len(files) == 0:
