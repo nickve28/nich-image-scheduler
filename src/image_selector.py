@@ -4,7 +4,7 @@ import subprocess
 import sys
 from typing import Dict, List
 
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -69,6 +69,8 @@ class Scheduler(QMainWindow):
         super(Scheduler, self).__init__()
         self.setWindowTitle("Scheduler")
 
+        self.setMinimumSize(1000, 700)
+
         # load the list of images and save it as full paths
         self._images: List[str] = find_images_in_folders(account, account.platforms, skip_queued=skip_queued)
 
@@ -85,6 +87,11 @@ class Scheduler(QMainWindow):
 
         if limit is not None and limit < len(self._images):
             self._images = self._images[:limit]
+
+        # Timer to control resize after the resize event ends
+        self.resize_timer = QTimer(self)
+        self.resize_timer.setSingleShot(True)
+        self.resize_timer.timeout.connect(self.resize_image)
 
         # prepare the window
         self.setup_window()
@@ -103,6 +110,8 @@ class Scheduler(QMainWindow):
     def setup_window(self) -> None:
         # current image
         self._image = QLabel()
+        self._image.setAlignment(Qt.AlignCenter)
+        self._image.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # current caption
         self._caption = QLineEdit()
@@ -137,8 +146,8 @@ class Scheduler(QMainWindow):
         self._image_selector_area.setFocusPolicy(Qt.NoFocus)
         self._image_selector_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self._image_selector_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self._image_selector_area.setFixedHeight(1000)
         self._image_selector_area.setFixedWidth(220)
+        self._image_selector_area.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         pose_selector_content_layout = QVBoxLayout()
         pose_selector_content_layout.setContentsMargins(10, 10, 20, 10)
@@ -150,6 +159,8 @@ class Scheduler(QMainWindow):
         # target layout
         target_layout = QVBoxLayout()
         target_layout.setContentsMargins(0, 0, 0, 0)
+
+        target_layout.addStretch()
 
         # create label
         target_label = QLabel("Targets")
@@ -191,34 +202,28 @@ class Scheduler(QMainWindow):
             button.clicked.connect(lambda state, index=index: post_image_now(self._targets[index]))  #
             target_layout.addWidget(button)
 
-        target_layout.addStretch()
-
         # create widget for the target layout
         target_widget = QWidget()
         target_widget.setLayout(target_layout)
-        target_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        target_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         # central layout
         central_layout = QVBoxLayout()
         central_layout.setContentsMargins(10, 10, 10, 10)
-        central_layout.addStretch()
-        central_layout.addWidget(self._image)
+        central_layout.addWidget(self._image, 1)
         central_layout.addWidget(self._caption)
         central_layout.addWidget(self._submit_button)
         central_layout.addLayout(filepath_layout)
-        central_layout.addStretch()
 
         # create widget for the central layout
         central_widget = QWidget()
         central_widget.setLayout(central_layout)
+        central_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # right layout
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(10, 10, 10, 10)
-
-        # Add a stretch at the top to push the content to the bottom
         right_layout.addStretch()
-
         right_layout.addWidget(target_widget, Qt.AlignTop)
 
         # create widget for the right layout
@@ -230,7 +235,7 @@ class Scheduler(QMainWindow):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.addStretch()
         main_layout.addWidget(self._image_selector_area)
-        main_layout.addWidget(central_widget)
+        main_layout.addWidget(central_widget, 1)
         main_layout.addWidget(right_widget)
         main_layout.addStretch()
 
@@ -270,8 +275,8 @@ class Scheduler(QMainWindow):
         self._current_image = image
         self._current_index = index
 
-        # change the image
-        self._image.setPixmap(QPixmap(image).scaledToHeight(900, Qt.SmoothTransformation))
+        # Resize the image when changed
+        self.resize_image()
 
         # change the caption
         caption = ImageMetadataAdjuster(image).get_caption() or ""
@@ -298,6 +303,28 @@ class Scheduler(QMainWindow):
 
         # Update status bar with the current file name
         self._status_bar.showMessage(self.generate_summary())
+
+    def resize_image(self):
+        pixmap = QPixmap(self._current_image)
+
+        # Get the size of the image label
+        label_size = self._image.size()
+
+        # Calculate the scaling factor to fit the image within the label
+        scale_factor = min(label_size.width() / pixmap.width(), label_size.height() / pixmap.height(), 1)
+
+        # Calculate the new size
+        new_size = QSize(int(pixmap.width() * scale_factor), int(pixmap.height() * scale_factor))
+
+        # Scale the pixmap and set it to the label
+        scaled_pixmap = pixmap.scaled(new_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self._image.setPixmap(scaled_pixmap)
+
+    def resizeEvent(self, event):
+        """Handle the window resize event."""
+        if hasattr(self, "_current_image"):
+            # Start or restart the timer every time the window is resized
+            self.resize_timer.start(300)  # 300ms delay after resizing ends
 
     def submit_callback(self) -> None:
         caption = self._caption.text()
