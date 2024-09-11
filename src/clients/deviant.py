@@ -88,7 +88,7 @@ class DeviantClient:
             return remove_duplicates(config.premium_gallery_ids)
         return remove_duplicates(config.gallery_ids)
 
-    def schedule(self, image_path, caption):
+    def schedule(self, image_path, caption, content_tags):
         mature_content = "false" if self.account.nsfw is False else "true"
         stripped_image_path = None
         file_handle = None
@@ -105,7 +105,9 @@ class DeviantClient:
 
             file_handle = open(stripped_image_path, "rb")
             files = {"file": file_handle}
-            unique_tags = remove_duplicates(self.account.deviant_config.tags)
+            all_tags = [tag.strip() for tag in content_tags.split(",")]
+            all_tags.extend(self.account.deviant_config.tags)
+            unique_tags = remove_duplicates(all_tags)
             data = {
                 "title": truncate_caption(caption),
                 "artist_comments": "",

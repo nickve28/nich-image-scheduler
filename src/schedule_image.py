@@ -39,6 +39,7 @@ def execute(account: Account, mode: str):
 
     file = random.sample(files, 1)[0]
     caption = ImageMetadataAdjuster(file).get_caption()
+    content_tags = ImageMetadataAdjuster(file).get_content_tags()
 
     def run():
         account.set_config_for(file)
@@ -46,7 +47,7 @@ def execute(account: Account, mode: str):
             return clients.twitter.TwitterClient(account).schedule(file, caption)
 
         if mode == "Deviant":
-            return clients.deviant.DeviantClient(account).schedule(file, caption)
+            return clients.deviant.DeviantClient(account).schedule(file, caption, content_tags)
 
         if mode == "Debug":
             return clients.test.TestClient(account).schedule(file, caption)
