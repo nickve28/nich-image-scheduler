@@ -43,13 +43,14 @@ def post_now(filename, mode):
     account_copy = select_account(account_data, scheduler_profile_ids=scheduler_profile_ids)
     account_copy.set_config_for(filename)
     caption = ImageMetadataAdjuster(filename).get_caption() or ""
+    content_tags = ImageMetadataAdjuster(filename).get_content_tags() or ""
 
     response = False
     if mode == "Twitter":
         response = TwitterClient(account_copy).schedule(filename, caption)
 
     if mode == "Deviant":
-        response = DeviantClient(account_copy).schedule(filename, caption)
+        response = DeviantClient(account_copy).schedule(filename, caption, content_tags)
 
     if response is not False:
         queue_tag = QUEUE_TAG_MAPPING[mode]
@@ -116,6 +117,10 @@ class Scheduler(QMainWindow):
         # current caption
         self._caption = QLineEdit()
         self._caption.setPlaceholderText("Enter a caption here...")
+
+        # tags
+        self._content_tags = QLineEdit()
+        self._content_tags.setPlaceholderText("Enter comma separated tags here...")
 
         # save
         self._submit_button = QPushButton("Save")
@@ -212,6 +217,7 @@ class Scheduler(QMainWindow):
         central_layout.setContentsMargins(10, 10, 10, 10)
         central_layout.addWidget(self._image, 1)
         central_layout.addWidget(self._caption)
+        central_layout.addWidget(self._content_tags)
         central_layout.addWidget(self._submit_button)
         central_layout.addLayout(filepath_layout)
 
@@ -282,6 +288,10 @@ class Scheduler(QMainWindow):
         caption = ImageMetadataAdjuster(image).get_caption() or ""
         self._caption.setText(caption)
 
+        # change the tags
+        content_tags = ImageMetadataAdjuster(image).get_content_tags() or ""
+        self._content_tags.setText(content_tags)
+
         # todo, can probably be done more elegant with mapping dicts
         posted_to_twitter = TWIT_POSTED in image
         queued_to_twitter = TWIT_QUEUED in image
@@ -328,8 +338,10 @@ class Scheduler(QMainWindow):
 
     def submit_callback(self) -> None:
         caption = self._caption.text()
+        content_tags = self._content_tags.text()
         adjuster = ImageMetadataAdjuster(self._current_image)
         adjuster.add_subject(caption)
+        adjuster.set_content_tags(content_tags)
         adjuster.save()
         platforms = dict([[checkbox.text(), checkbox.isChecked()] for checkbox in self._target_checkboxes])
         new_filename = rename_file_with_tags(self._current_image, platforms)

@@ -18,7 +18,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(SUBMIT_URL, json={"id": "123"})
             client = DeviantClient(account())
 
-            assert client.schedule("tests/fixtures/test.jpg", "some caption") == {"id": "123"}
+            assert client.schedule("tests/fixtures/test.jpg", "some caption", "") == {"id": "123"}
 
     def test_post_image_successfully_writes_refresh_token(self):
         with requests_mock.Mocker() as req_mock:
@@ -26,7 +26,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
             req_mock.post(UPLOAD_URL, json={"itemid": "1"})
             req_mock.post(SUBMIT_URL, json={})
-            DeviantClient(account({"id": "test"})).schedule("tests/fixtures/test.jpg", "some caption")
+            DeviantClient(account({"id": "test"})).schedule("tests/fixtures/test.jpg", "some caption", "")
 
             assert get_refresh_token("test") == random_token
 
@@ -37,7 +37,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(UPLOAD_URL, json={"itemid": "1"})
             req_mock.post(SUBMIT_URL, json={})
 
-            DeviantClient(account()).schedule("tests/fixtures/test.jpg", "some caption")
+            DeviantClient(account()).schedule("tests/fixtures/test.jpg", "some caption", "")
 
             self.assertEqual(req_mock.request_history[1].headers["Authorization"], "Bearer acc123")
 
@@ -48,7 +48,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(UPLOAD_URL, json={"itemid": "1"})
             req_mock.post(SUBMIT_URL, json={})
 
-            DeviantClient(account()).schedule("tests/fixtures/test.jpg", "some caption")
+            DeviantClient(account()).schedule("tests/fixtures/test.jpg", "some caption", "")
 
             self.assertEqual(req_mock.request_history[2].headers["Authorization"], "Bearer acc123")
 
@@ -59,7 +59,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
 
-            DeviantClient(account()).schedule("tests/fixtures/test.jpg", "some caption")
+            DeviantClient(account()).schedule("tests/fixtures/test.jpg", "some caption", "")
 
             expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=false&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true"
             self.assertEqual(req_mock.request_history[2].text, expected)
@@ -71,7 +71,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
 
-            DeviantClient(account({"nsfw": True})).schedule("tests/fixtures/test.jpg", "some caption")
+            DeviantClient(account({"nsfw": True})).schedule("tests/fixtures/test.jpg", "some caption", "")
 
             expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true"
             self.assertEqual(req_mock.request_history[2].text, expected)
@@ -84,7 +84,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(SUBMIT_URL, json={})
             caption = "This caption is way beyond the length of 50 characters"
             loaded_account = account({"deviant": {"gallery_ids": ["123"], "featured": False}})
-            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", caption)
+            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", caption, "")
 
             self.assertIn(f"{caption[:50]}\r\n", req_mock.request_history[1].body.decode("latin1"))
             self.assertIn(f"title={caption[:50].replace(' ', '+')}", req_mock.request_history[2].text)
@@ -96,7 +96,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
             loaded_account = account({"deviant": {"gallery_ids": ["123", "456"], "featured": False}})
-            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption")
+            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption", "")
 
             expected_feature = "feature=false"
             expected_gallery_ids = "galleryids%5B%5D=123&galleryids%5B%5D=456"
@@ -110,7 +110,7 @@ class TestDeviantClient(unittest.TestCase):
             req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
             req_mock.post(SUBMIT_URL, json={})
             loaded_account = account({"deviant": {"gallery_ids": ["123", "456"], "premium_gallery_ids": ["prem123"], "featured": True}})
-            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption")
+            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption", "")
 
             expected_feature = "feature=false"
             expected_gallery_ids = "galleryids%5B%5D=prem123"
