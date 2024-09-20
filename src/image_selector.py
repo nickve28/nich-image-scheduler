@@ -18,8 +18,9 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QSizePolicy,
     QStatusBar,
+    QShortcut,
 )
-from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor
+from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor, QKeySequence
 
 from clients.deviant import DeviantClient
 from clients.twitter import TwitterClient
@@ -103,10 +104,54 @@ class Scheduler(QMainWindow):
         # set the first image by default
         self.change_image(self._images[0], 0)
 
+        self.setup_shortcuts()
+
+    def setup_shortcuts(self):
+        # Shortcut for toggling Deviant checkbox
+        self.toggle_deviant_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
+        self.toggle_deviant_shortcut.activated.connect(self.toggle_deviant_checkbox)
+
+        # Shortcut for toggling Twitter checkbox
+        self.toggle_twitter_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.toggle_twitter_shortcut.activated.connect(self.toggle_twitter_checkbox)
+
+        # Shortcut for saving (pressing the save button)
+        self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
+        self.save_shortcut.activated.connect(self.submit_callback)
+
+        # Shortcut for navigating to previous image
+        self.prev_image_shortcut = QShortcut(QKeySequence("F1"), self)
+        self.prev_image_shortcut.activated.connect(self.show_previous_image)
+
+        # Shortcut for navigating to next image
+        self.next_image_shortcut = QShortcut(QKeySequence("F2"), self)
+        self.next_image_shortcut.activated.connect(self.show_next_image)
+
+    def toggle_deviant_checkbox(self):
+        self.toggle_platform_checkbox("Deviant")
+
+    def toggle_twitter_checkbox(self):
+        self.toggle_platform_checkbox("Twitter")
+
+    def toggle_platform_checkbox(self, platform):
+        checkbox = next((checkbox for checkbox in self._target_checkboxes if checkbox.text() == platform), None)
+        if checkbox and checkbox.isEnabled():
+            checkbox.setChecked(not checkbox.isChecked())
+            # self.submit_callback()  # Automatically save the changes
+
+    def show_previous_image(self):
+        if self._current_index > 0:
+            self.change_image(self._images[self._current_index - 1], self._current_index - 1)
+
+    def show_next_image(self):
+        if self._current_index < len(self._images) - 1:
+            self.change_image(self._images[self._current_index + 1], self._current_index + 1)
+
     def keyPressEvent(self, e: QKeyEvent) -> None:  # type: ignore
         if e.key() == Qt.Key_Escape:
             self.close()
             return
+        super().keyPressEvent(e)  # Call the parent class method to handle other key events
 
     def setup_window(self) -> None:
         # current image
@@ -313,6 +358,11 @@ class Scheduler(QMainWindow):
 
         # Update status bar with the current file name
         self._status_bar.showMessage(self.generate_summary())
+
+        # Set focus on the caption input
+        self._caption.setFocus()
+        # Move cursor to the end of the text
+        self._caption.setCursorPosition(len(caption))
 
     def resize_image(self):
         pixmap = QPixmap(self._current_image)
