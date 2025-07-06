@@ -1,8 +1,9 @@
+import argparse
 import random
 import os
 import subprocess
 import sys
-from typing import Dict, List
+from typing import List
 
 from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtWidgets import (
@@ -19,39 +20,31 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QStatusBar,
     QShortcut,
+    QTabWidget,
+    QMessageBox,
 )
 from PyQt5.QtGui import QKeyEvent, QIcon, QPixmap, QPalette, QColor, QKeySequence
 
 from clients.deviant import DeviantClient
 from clients.twitter import TwitterClient
-from utils.cli_args import parse_arguments, get_scheduler_profile_ids
 from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED, POSTED_TAG_MAPPING, QUEUE_TAG_MAPPING
 from utils.file_utils import find_images_in_folders, rename_file_with_tags, replace_file_tag
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
-from utils.account_loader import select_account
-
-args = parse_arguments()
-account_data = args.account
-scheduler_profile_ids = get_scheduler_profile_ids(args)
-account = select_account(account_data, scheduler_profile_ids=scheduler_profile_ids)
-
-sort = args.sort
-limit = args.limit
-skip_queued = args.skip_queued
+from utils.account_loader import load_accounts, parse_account
 
 
-def post_now(filename, mode):
-    account_copy = select_account(account_data, scheduler_profile_ids=scheduler_profile_ids)
-    account_copy.set_config_for(filename)
+def post_now(filename, mode, account):
+    """Post an image immediately to the specified platform"""
+    account.set_config_for(filename)
     caption = ImageMetadataAdjuster(filename).get_caption() or ""
     content_tags = ImageMetadataAdjuster(filename).get_content_tags() or ""
 
     response = False
     if mode == "Twitter":
-        response = TwitterClient(account_copy).schedule(filename, caption)
+        response = TwitterClient(account).schedule(filename, caption)
 
     if mode == "Deviant":
-        response = DeviantClient(account_copy).schedule(filename, caption, content_tags)
+        response = DeviantClient(account).schedule(filename, caption, content_tags)
 
     if response is not False:
         queue_tag = QUEUE_TAG_MAPPING[mode]
@@ -66,19 +59,22 @@ def post_now(filename, mode):
     return False
 
 
-class Scheduler(QMainWindow):
-    def __init__(self):
-        super(Scheduler, self).__init__()
-        self.setWindowTitle("Scheduler")
+class SchedulerWidget(QWidget):
+    """Individual scheduler widget for one account (formerly the main Scheduler class)"""
+    def __init__(self, account, sort="alphabetical", limit=None, skip_queued=False):
+        super(SchedulerWidget, self).__init__()
 
-        self.setMinimumSize(1000, 700)
+        self.account = account
+        self.sort = sort
+        self.limit = limit
+        self.skip_queued = skip_queued
 
         # load the list of images and save it as full paths
         self._images: List[str] = find_images_in_folders(account, account.platforms, skip_queued=skip_queued)
 
         if len(self._images) == 0:
-            err = f"No images found for account {account.id} using patterns {account.directory_paths}"
-            raise RuntimeError(err)
+            # Don't raise error, just show empty message
+            self._images = []
 
         if sort == "random":
             random.shuffle(self._images)
@@ -95,14 +91,12 @@ class Scheduler(QMainWindow):
         self.resize_timer.setSingleShot(True)
         self.resize_timer.timeout.connect(self.resize_image)
 
-        # prepare the window
-        self.setup_window()
+        # prepare the widget
+        self.setup_widget()
 
-        # show window
-        self.show()
-
-        # set the first image by default
-        self.change_image(self._images[0], 0)
+        # set the first image by default if we have images
+        if self._images:
+            self.change_image(self._images[0], 0)
 
         self.setup_shortcuts()
 
@@ -137,7 +131,6 @@ class Scheduler(QMainWindow):
         checkbox = next((checkbox for checkbox in self._target_checkboxes if checkbox.text() == platform), None)
         if checkbox and checkbox.isEnabled():
             checkbox.setChecked(not checkbox.isChecked())
-            # self.submit_callback()  # Automatically save the changes
 
     def show_previous_image(self):
         if self._current_index > 0:
@@ -147,13 +140,16 @@ class Scheduler(QMainWindow):
         if self._current_index < len(self._images) - 1:
             self.change_image(self._images[self._current_index + 1], self._current_index + 1)
 
-    def keyPressEvent(self, e: QKeyEvent) -> None:  # type: ignore
-        if e.key() == Qt.Key_Escape:
-            self.close()
+    def setup_widget(self) -> None:
+        if not self._images:
+            # Show message for no images
+            no_images_label = QLabel(f"No images found for account '{self.account.id}'\nPaths: {self.account.directory_paths}")
+            no_images_label.setAlignment(Qt.AlignCenter)
+            layout = QVBoxLayout()
+            layout.addWidget(no_images_label)
+            self.setLayout(layout)
             return
-        super().keyPressEvent(e)  # Call the parent class method to handle other key events
 
-    def setup_window(self) -> None:
         # current image
         self._image = QLabel()
         self._image.setAlignment(Qt.AlignCenter)
@@ -199,17 +195,12 @@ class Scheduler(QMainWindow):
         self._image_selector_area.setFixedWidth(220)
         self._image_selector_area.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
-        pose_selector_content_layout = QVBoxLayout()
-        pose_selector_content_layout.setContentsMargins(10, 10, 20, 10)
-        pose_selector_content_layout.addStretch()
-
         # populate the image selector
         self.populate_image_selector()
 
         # target layout
         target_layout = QVBoxLayout()
         target_layout.setContentsMargins(0, 0, 0, 0)
-
         target_layout.addStretch()
 
         # create label
@@ -218,7 +209,7 @@ class Scheduler(QMainWindow):
         target_layout.addWidget(target_label)
 
         # create checkboxes
-        self._targets = account.platforms
+        self._targets = self.account.platforms
         self._target_checkboxes: "list[QCheckBox]" = []
         for target in self._targets:
             checkbox = QCheckBox(target)
@@ -227,10 +218,12 @@ class Scheduler(QMainWindow):
             self._target_checkboxes.append(checkbox)
 
         def post_image_now(target):
-            new_filename = post_now(self._current_image, target)
+            new_filename = post_now(self._current_image, target, self.account)
 
             if new_filename is False:
-                raise RuntimeError("Error during saving")
+                QMessageBox.warning(self, "Error", f"Failed to post to {target}")
+                return
+
             # Make sure the name is updated for subsequent saves
             self._current_image = new_filename
             self._images[self._current_index] = new_filename
@@ -238,18 +231,12 @@ class Scheduler(QMainWindow):
             # Update filepath display with the new filename
             self._filepath_display.setText(new_filename)
 
-            # Update status bar with the new file name
-            self._status_bar.showMessage(self.generate_summary())
-
             self.update_image_selector_button(self._current_index, new_filename)
 
         # add instant post buttons
         for index, target in enumerate(self._targets):
             button = QPushButton(f"Post now ({target})")
-            # todo
-            # post_tag = POSTED_TAG_MAPPING[target]
-            # button.setDisabled(post_tag in self._current_image)
-            button.clicked.connect(lambda state, index=index: post_image_now(self._targets[index]))  #
+            button.clicked.connect(lambda state, index=index: post_image_now(self._targets[index]))
             target_layout.addWidget(button)
 
         # create widget for the target layout
@@ -290,14 +277,8 @@ class Scheduler(QMainWindow):
         main_layout.addWidget(right_widget)
         main_layout.addStretch()
 
-        # set the window layout
-        main_widget = QWidget()
-        main_widget.setLayout(main_layout)
-        self.setCentralWidget(main_widget)
-
-        # Add status bar
-        self._status_bar = QStatusBar()
-        self.setStatusBar(self._status_bar)
+        # set the widget layout
+        self.setLayout(main_layout)
 
     def populate_image_selector(self) -> None:
         # create a layout for the image selector
@@ -356,15 +337,15 @@ class Scheduler(QMainWindow):
         # Update filepath display
         self._filepath_display.setText(image)
 
-        # Update status bar with the current file name
-        self._status_bar.showMessage(self.generate_summary())
-
         # Set focus on the caption input
         self._caption.setFocus()
         # Move cursor to the end of the text
         self._caption.setCursorPosition(len(caption))
 
     def resize_image(self):
+        if not hasattr(self, '_current_image'):
+            return
+
         pixmap = QPixmap(self._current_image)
 
         # Get the size of the image label
@@ -381,12 +362,15 @@ class Scheduler(QMainWindow):
         self._image.setPixmap(scaled_pixmap)
 
     def resizeEvent(self, event):
-        """Handle the window resize event."""
+        """Handle the widget resize event."""
         if hasattr(self, "_current_image"):
-            # Start or restart the timer every time the window is resized
+            # Start or restart the timer every time the widget is resized
             self.resize_timer.start(300)  # 300ms delay after resizing ends
 
     def submit_callback(self) -> None:
+        if not hasattr(self, '_current_image'):
+            return
+
         caption = self._caption.text()
         content_tags = self._content_tags.text()
         adjuster = ImageMetadataAdjuster(self._current_image)
@@ -403,9 +387,6 @@ class Scheduler(QMainWindow):
         # Update filepath display with the new filename
         self._filepath_display.setText(new_filename)
 
-        # Update status bar with the new file name
-        self._status_bar.showMessage(self.generate_summary())
-
         self.update_image_selector_button(self._current_index, new_filename)
 
     def update_image_selector_button(self, index: int, new_filename: str) -> None:
@@ -415,7 +396,7 @@ class Scheduler(QMainWindow):
         button.setIcon(QIcon(new_filename))
 
     def locate_file(self):
-        if not self._current_image:
+        if not hasattr(self, '_current_image') or not self._current_image:
             return
 
         file_path = os.path.abspath(self._current_image)
@@ -430,35 +411,80 @@ class Scheduler(QMainWindow):
             else:  # Linux
                 subprocess.run(["xdg-open", os.path.dirname(file_path)])
 
-    def generate_summary(self):
-        all_images = find_images_in_folders(account, account.platforms, False, False)
-        total_images = len(all_images)
-        summary = {"Twitter": {"posted": 0, "queued": 0, "rest": 0}, "Deviant": {"posted": 0, "queued": 0, "rest": 0}}
 
-        for image in all_images:
-            for platform in account.platforms:
-                if POSTED_TAG_MAPPING[platform] in image:
-                    summary[platform]["posted"] += 1
-                elif QUEUE_TAG_MAPPING[platform] in image:
-                    summary[platform]["queued"] += 1
-                else:
-                    summary[platform]["rest"] += 1
+class TabbedSchedulerWindow(QMainWindow):
+    """Main window containing tabs for each account"""
+    def __init__(self, sort: str = "alphabetical", limit: int | None = None, skip_queued: bool = False):
+        super(TabbedSchedulerWindow, self).__init__()
+        self.setWindowTitle("Image Scheduler - Multi Account")
+        self.setMinimumSize(1200, 800)
 
-        summary_str = ""
-        if len(account.directory_paths) > 1:
-            summary_str += f"Multiple configured paths: {total_images} images"
+        self.sort = sort
+        self.limit = limit
+        self.skip_queued = skip_queued
+
+        try:
+            accounts_data = load_accounts()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load accounts.yml: {e}")
+            sys.exit(1)
+
+        if not accounts_data:
+            QMessageBox.warning(self, "Warning", "No accounts found in accounts.yml")
+            sys.exit(1)
+
+        # Create tab widget
+        self.tab_widget = QTabWidget()
+        self.setCentralWidget(self.tab_widget)
+
+        # Create a tab for each account
+        for account_name, account_config in accounts_data.items():
+            try:
+                account = parse_account(account_config, scheduler_profile_ids=[])
+                scheduler_widget = SchedulerWidget(account=account, sort=sort, limit=limit, skip_queued=skip_queued)
+                self.tab_widget.addTab(scheduler_widget, account_name)
+            except Exception as e:
+                error_widget = QLabel(f"Error loading account '{account_name}':\n{str(e)}")
+                error_widget.setAlignment(Qt.AlignCenter)
+                self.tab_widget.addTab(error_widget, f"{account_name} (Error)")
+
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+
+        # Update status bar based on current tab
+        self.tab_widget.currentChanged.connect(self.update_status_bar)
+        self.update_status_bar(0)
+
+    def update_status_bar(self, index):
+        """Update status bar based on the current tab"""
+        current_widget = self.tab_widget.widget(index)
+        if isinstance(current_widget, SchedulerWidget) and hasattr(current_widget, 'account'):
+            account = current_widget.account
+            all_images = find_images_in_folders(account, account.platforms, False, False)
+            total_images = len(all_images)
+            self.status_bar.showMessage(f"Account: {account.id} | Total images: {total_images}")
         else:
-            f"{account.directory_paths[0]}: {total_images} images."
+            self.status_bar.showMessage("Ready")
 
-        for platform in account.platforms:
-            summary_str += (
-                f" {platform}: posted: {summary[platform]['posted']}, queued: {summary[platform]['queued']}, rest: {summary[platform]['rest']}"
-            )
+    def keyPressEvent(self, e: QKeyEvent) -> None:
+        if e.key() == Qt.Key_Escape:
+            self.close()
+            return
+        super().keyPressEvent(e)
 
-        return summary_str
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Image Selector and Scheduler - Multi Account")
+    parser.add_argument("--sort", choices=["random", "latest", "alphabetical"], default="alphabetical", help="Sorting method for images (default: alphabetical)")
+    parser.add_argument("--limit", type=int, help="Limit the number of images to process")
+    parser.add_argument("--skip-queued", action="store_true", help="Skip already queued images")
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
+    args = parse_arguments()
+
     app = QApplication(sys.argv)
-    window = Scheduler()
+    window = TabbedSchedulerWindow(sort=args.sort, limit=args.limit, skip_queued=args.skip_queued)
+    window.show()
     sys.exit(app.exec_())
