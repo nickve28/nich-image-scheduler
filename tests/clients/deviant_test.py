@@ -61,7 +61,7 @@ class TestDeviantClient(unittest.TestCase):
 
             DeviantClient(account()).schedule("tests/fixtures/test.jpg", "some caption", "")
 
-            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=false&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true"
+            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=false&is_ai_generated=true&noai=false&allow_free_download=false&display_resolution=0&feature=true"
             self.assertEqual(req_mock.request_history[2].text, expected)
 
     def test_post_image_sends_correct_payload_to_submit_with_nsfw_on(self):
@@ -73,7 +73,7 @@ class TestDeviantClient(unittest.TestCase):
 
             DeviantClient(account({"nsfw": True})).schedule("tests/fixtures/test.jpg", "some caption", "")
 
-            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&allow_free_download=false&display_resolution=0&feature=true"
+            expected = "itemid=itemid1&title=some+caption&artist_comments=&is_mature=true&is_ai_generated=true&noai=false&allow_free_download=false&display_resolution=0&feature=true"
             self.assertEqual(req_mock.request_history[2].text, expected)
 
     def test_post_image_sends_truncates_title_length(self):

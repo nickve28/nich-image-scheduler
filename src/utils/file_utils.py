@@ -2,10 +2,66 @@ import fnmatch
 import glob
 import itertools
 import os
-from typing import Dict, List
+import re
+from typing import Dict, List, Optional
 
 from models.account import Account
 from utils.constants import QUEUE_TAG_MAPPING, POSTED_TAG_MAPPING
+
+
+def sanitize_caption_for_filename(caption: str, max_length: int = 100) -> str:
+    """Sanitize a caption for use in a filename.
+
+    Removes invalid characters and limits length.
+    """
+    if not caption:
+        return ""
+
+    # Remove or replace invalid filename characters
+    # Keep only alphanumeric, spaces, hyphens, underscores, and basic punctuation
+    sanitized = re.sub(r'[<>:"/\\|?*]', '', caption)
+    sanitized = re.sub(r'[\n\r\t]', ' ', sanitized)  # Replace newlines/tabs with spaces
+    sanitized = re.sub(r'\s+', ' ', sanitized)  # Collapse multiple spaces
+    sanitized = sanitized.strip()
+
+    # Truncate if too long
+    if len(sanitized) > max_length:
+        sanitized = sanitized[:max_length].rstrip()
+
+    return sanitized
+
+
+def add_caption_to_filename(filename: str, caption: str) -> str:
+    """Add or update a caption in a filename using _[caption] format.
+
+    Args:
+        filename: Filename without extension (e.g., 'image_DEVI_Q')
+        caption: Caption to add
+
+    Returns:
+        Filename with caption added/updated
+    """
+    sanitized_caption = sanitize_caption_for_filename(caption)
+    if not sanitized_caption:
+        # If no caption, remove any existing caption
+        return re.sub(r'_\[.*?\]', '', filename)
+
+    # Check if there's already a caption in brackets
+    if re.search(r'_\[.*?\]', filename):
+        # Replace existing caption
+        return re.sub(r'_\[.*?\]', f'_[{sanitized_caption}]', filename)
+    else:
+        # Add new caption - insert before any platform tags
+        # Find the position of the first platform tag
+        tag_pattern = r'(_DEVI_[QP]|_TWIT_[QP])'
+        match = re.search(tag_pattern, filename)
+        if match:
+            # Insert caption before the tag
+            pos = match.start()
+            return filename[:pos] + f'_[{sanitized_caption}]' + filename[pos:]
+        else:
+            # No tags found, just append
+            return f'{filename}_[{sanitized_caption}]'
 
 
 def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
@@ -34,11 +90,15 @@ def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
 # Renames the given filepath, depending on the selected options provided in the platform_dict
 # Adds or no-ops the platform_Q name, if selected
 # Removes or no-ops the platform_Q name, if deselected
-def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool]):
+def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool], caption: str = ""):
     # Split the file path into directory, filename, and extension
     directory, basename = os.path.split(filepath)
     filename, file_extension = os.path.splitext(basename)
     new_filename_without_extension = filename
+
+    # Add or update caption first
+    new_filename_without_extension = add_caption_to_filename(new_filename_without_extension, caption)
+
     for platform, checked in platform_dict.items():
         # Check if tag is already in the filename
         queued_tag = QUEUE_TAG_MAPPING[platform]
@@ -66,7 +126,7 @@ def rename_json_if_exists(filepath: str, new_filepath: str):
         print(f"No corresponding JSON file found for {filepath}")
 
 
-def get_excluded_tags(platforms: List[str], skip_posted: bool, skip_queued: bool):
+def get_excluded_tags(platforms: List[str], skip_posted: bool, skip_queued: bool) -> List[str]:
     # Get tags which will be excluded from the results
     excluded_tags = []
     if skip_posted:
@@ -127,7 +187,7 @@ def find_images_in_folder(folder_path: str, account: Account, excluded_tags: Lis
     return image_paths
 
 
-def find_images_in_folders(account: Account, platforms: List[str], skip_queued: bool, skip_posted=True):
+def find_images_in_folders(account: Account, platforms: List[str], skip_queued: bool, skip_posted: bool=True):
     excluded_tags = get_excluded_tags(platforms, skip_posted, skip_queued)
     result = []
     for folder_path in account.directory_paths:
