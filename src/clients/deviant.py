@@ -4,6 +4,7 @@ from PIL import Image
 import os
 
 from deviant_utils.deviant_refresh_token import write_token_to_file
+from deviant_utils.pick_resolution import get_optimal_resolution
 from utils.text_utils import remove_duplicates
 from models.account import Account
 
@@ -11,9 +12,9 @@ TOKEN_URL = "https://www.deviantart.com/oauth2/token"
 UPLOAD_URL = "https://www.deviantart.com/api/v1/oauth2/stash/submit"
 SUBMIT_URL = "https://www.deviantart.com/api/v1/oauth2/stash/publish"
 FOLDERS_URL = "https://www.deviantart.com/api/v1/oauth2/gallery/folders"
+GALLERY_ALL_URL = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
+DEVIATION_EDIT_URL = "https://www.deviantart.com/api/v1/oauth2/deviation/edit/{deviationid}"
 
-# https://www.deviantart.com/developers/console/stash/stash_publish/a799a5c0967dca14e854286df9746793
-DEVI_ORIGINAL_DISPLAY_RESOLUTION = 0
 MAX_TITLE_LENGTH = 50
 
 
@@ -82,6 +83,55 @@ class DeviantClient:
         response = requests.get(FOLDERS_URL, params=payload, headers=headers)
         return response.json()
 
+    def get_all_deviations(self, username, offset=0, limit=24, mature_content=True):
+        """
+        Retrieve all deviations from a user's gallery (/all).
+
+        Args:
+            username: DeviantArt username
+            offset: Starting position for pagination (default: 0)
+            limit: Number of deviations to retrieve (max 24, default: 24)
+            mature_content: Whether to include mature content (default: True)
+
+        Returns:
+            Tuple of (JSON response containing deviations and pagination info, access_token)
+        """
+        access_token = self._obtain_access_token()
+        print(f"Authenticated {access_token}")
+        payload = {
+            "username": username,
+            "offset": offset,
+            "limit": min(limit, 24),  # API max is 24
+            "mature_content": "true" if mature_content else "false"
+        }
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = requests.get(GALLERY_ALL_URL, params=payload, headers=headers)
+        return response.json(), access_token
+
+    def edit_deviation_resolution(self, deviationid, display_resolution=8, access_token=None):
+        """
+        Edit a deviation's display resolution.
+
+        Args:
+            deviationid: The deviation ID to edit
+            display_resolution: Resolution code (8=1920px, default: 8)
+            access_token: Optional access token to reuse (default: None, will obtain new one)
+
+        Returns:
+            JSON response from the API
+        """
+        if access_token is None:
+            access_token = self._obtain_access_token()
+            print(f"Authenticated {access_token}")
+
+        url = DEVIATION_EDIT_URL.format(deviationid=deviationid)
+        payload = {
+            "display_resolution": display_resolution
+        }
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = requests.post(url, data=payload, headers=headers)
+        return response.json()
+
     def _get_gallery_ids(self):
         config = self.account.deviant_config
         if len(config.premium_gallery_ids) > 0:
@@ -128,8 +178,9 @@ class DeviantClient:
                 "artist_comments": "",
                 "is_mature": mature_content,
                 "is_ai_generated": "true",
+                "noai": "false",
                 "allow_free_download": "false",
-                "display_resolution": DEVI_ORIGINAL_DISPLAY_RESOLUTION,
+                "display_resolution": get_optimal_resolution(image_path),
                 "feature": "true" if can_be_featured else "false",
                 "galleryids[]": self._get_gallery_ids(),
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,
