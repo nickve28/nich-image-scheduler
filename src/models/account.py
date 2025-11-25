@@ -135,7 +135,7 @@ class Account:
         if SupportedPlatforms.TWITTER.value in account_config:
             self.twitter_config = TwitterPlatformConfig(self.id, account_config[SupportedPlatforms.TWITTER.value])
 
-    def set_config_for(self, path):
+    def set_config_for(self, path: str):
         """
         Merges sub configs and creates an account configuration based on the given file path
         This allows for generating specific configuration for folders, like adding specific tags
