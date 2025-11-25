@@ -19,11 +19,13 @@ See the provided accounts.example.yml for a baseline
 
 ### 2. run the starter script for image_selector.py, and add captions to the images
 
-`python src/image_selector.py nick`
+`python src/image_selector.py`
 
 ### 3. (deviant only), log in to deviant first time
 
-`python src/authenticate_deviant.py nick`
+`python src/authenticate_deviant.py <account_name>`
+
+Where account_name matches your entry in accounts.yml you want to authenticate
 
 Go to localhost:3000/login, and accept
 The contents will be written to a non versioned folder using the id in the associated yaml account
