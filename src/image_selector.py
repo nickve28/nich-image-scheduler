@@ -31,9 +31,10 @@ from utils.constants import DEVI_POSTED, DEVI_QUEUED, TWIT_POSTED, TWIT_QUEUED, 
 from utils.file_utils import find_images_in_folders, rename_file_with_tags, replace_file_tag
 from utils.image_metadata_adjuster import ImageMetadataAdjuster
 from utils.account_loader import load_accounts, parse_account
+from models.account import Account
 
 
-def post_now(filename, mode, account):
+def post_now(filename: str, mode: str, account: Account) -> str | bool:
     """Post an image immediately to the specified platform"""
     account.set_config_for(filename)
     caption = ImageMetadataAdjuster(filename).get_caption() or ""
@@ -61,13 +62,11 @@ def post_now(filename, mode, account):
 
 class SchedulerWidget(QWidget):
     """Individual scheduler widget for one account (formerly the main Scheduler class)"""
-    def __init__(self, account, sort="alphabetical", limit=None, skip_queued=False):
+    def __init__(self, account, main_window=None, sort="alphabetical", limit: int | None =None, skip_queued=False):
         super(SchedulerWidget, self).__init__()
 
-        self.account = account
-        self.sort = sort
-        self.limit = limit
-        self.skip_queued = skip_queued
+        self.account: Account = account
+        self.main_window = main_window
 
         # load the list of images and save it as full paths
         self._images: List[str] = find_images_in_folders(account, account.platforms, skip_queued=skip_queued)
@@ -79,7 +78,7 @@ class SchedulerWidget(QWidget):
         if sort == "random":
             random.shuffle(self._images)
         elif sort == "latest":
-            self._images.sort(key=lambda x: os.path.getctime(x), reverse=True)
+            self._images.sort(key=lambda x: os.path.getmtime(x), reverse=True)
         else:
             self._images.sort()
 
@@ -127,7 +126,7 @@ class SchedulerWidget(QWidget):
     def toggle_twitter_checkbox(self):
         self.toggle_platform_checkbox("Twitter")
 
-    def toggle_platform_checkbox(self, platform):
+    def toggle_platform_checkbox(self, platform: str):
         checkbox = next((checkbox for checkbox in self._target_checkboxes if checkbox.text() == platform), None)
         if checkbox and checkbox.isEnabled():
             checkbox.setChecked(not checkbox.isChecked())
@@ -209,7 +208,7 @@ class SchedulerWidget(QWidget):
         target_layout.addWidget(target_label)
 
         # create checkboxes
-        self._targets = self.account.platforms
+        self._targets: List[str] = self.account.platforms
         self._target_checkboxes: "list[QCheckBox]" = []
         for target in self._targets:
             checkbox = QCheckBox(target)
@@ -217,7 +216,7 @@ class SchedulerWidget(QWidget):
             target_layout.addWidget(checkbox)
             self._target_checkboxes.append(checkbox)
 
-        def post_image_now(target):
+        def post_image_now(target: str) -> None:
             new_filename = post_now(self._current_image, target, self.account)
 
             if new_filename is False:
@@ -232,6 +231,10 @@ class SchedulerWidget(QWidget):
             self._filepath_display.setText(new_filename)
 
             self.update_image_selector_button(self._current_index, new_filename)
+
+            # Update status bar to reflect new counts
+            if self.main_window:
+                self.main_window.update_status_bar(self.main_window.tab_widget.currentIndex())
 
         # add instant post buttons
         for index, target in enumerate(self._targets):
@@ -378,7 +381,7 @@ class SchedulerWidget(QWidget):
         adjuster.set_content_tags(content_tags)
         adjuster.save()
         platforms = dict([[checkbox.text(), checkbox.isChecked()] for checkbox in self._target_checkboxes])
-        new_filename = rename_file_with_tags(self._current_image, platforms)
+        new_filename = rename_file_with_tags(self._current_image, platforms, caption)
 
         # Make sure the name is updated for subsequent saves
         self._current_image = new_filename
@@ -388,6 +391,10 @@ class SchedulerWidget(QWidget):
         self._filepath_display.setText(new_filename)
 
         self.update_image_selector_button(self._current_index, new_filename)
+
+        # Update status bar to reflect new counts
+        if self.main_window:
+            self.main_window.update_status_bar(self.main_window.tab_widget.currentIndex())
 
     def update_image_selector_button(self, index: int, new_filename: str) -> None:
         image_selector_widget = self._image_selector_area.widget()
@@ -416,12 +423,8 @@ class TabbedSchedulerWindow(QMainWindow):
     """Main window containing tabs for each account"""
     def __init__(self, sort: str = "alphabetical", limit: int | None = None, skip_queued: bool = False):
         super(TabbedSchedulerWindow, self).__init__()
-        self.setWindowTitle("Image Scheduler - Multi Account")
+        self.setWindowTitle("Image Scheduler")
         self.setMinimumSize(1200, 800)
-
-        self.sort = sort
-        self.limit = limit
-        self.skip_queued = skip_queued
 
         try:
             accounts_data = load_accounts()
@@ -441,7 +444,7 @@ class TabbedSchedulerWindow(QMainWindow):
         for account_name, account_config in accounts_data.items():
             try:
                 account = parse_account(account_config, scheduler_profile_ids=[])
-                scheduler_widget = SchedulerWidget(account=account, sort=sort, limit=limit, skip_queued=skip_queued)
+                scheduler_widget = SchedulerWidget(account=account, main_window=self, sort=sort, limit=limit, skip_queued=skip_queued)
                 self.tab_widget.addTab(scheduler_widget, account_name)
             except Exception as e:
                 error_widget = QLabel(f"Error loading account '{account_name}':\n{str(e)}")
@@ -455,14 +458,28 @@ class TabbedSchedulerWindow(QMainWindow):
         self.tab_widget.currentChanged.connect(self.update_status_bar)
         self.update_status_bar(0)
 
-    def update_status_bar(self, index):
+    def update_status_bar(self, index: int):
         """Update status bar based on the current tab"""
         current_widget = self.tab_widget.widget(index)
         if isinstance(current_widget, SchedulerWidget) and hasattr(current_widget, 'account'):
             account = current_widget.account
             all_images = find_images_in_folders(account, account.platforms, False, False)
             total_images = len(all_images)
-            self.status_bar.showMessage(f"Account: {account.id} | Total images: {total_images}")
+
+            # Count posted images (contain any _P tag)
+            posted_tags = [POSTED_TAG_MAPPING[platform] for platform in account.platforms]
+            posted_images = [img for img in all_images if any(tag in img for tag in posted_tags)]
+            posted_count = len(posted_images)
+
+            # Count queued images (contain any _Q tag)
+            queued_tags = [QUEUE_TAG_MAPPING[platform] for platform in account.platforms]
+            queued_images = [img for img in all_images if any(tag in img for tag in queued_tags)]
+            queued_count = len(queued_images)
+
+            # Count remaining images (neither posted nor queued)
+            remaining_count = total_images - posted_count - queued_count
+
+            self.status_bar.showMessage(f"Account: {account.id} | Total: {total_images} | Posted: {posted_count} | Queued: {queued_count} | Remaining: {remaining_count}")
         else:
             self.status_bar.showMessage("Ready")
 
@@ -474,7 +491,7 @@ class TabbedSchedulerWindow(QMainWindow):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Image Selector and Scheduler - Multi Account")
+    parser = argparse.ArgumentParser(description="Image Scheduler")
     parser.add_argument("--sort", choices=["random", "latest", "alphabetical"], default="alphabetical", help="Sorting method for images (default: alphabetical)")
     parser.add_argument("--limit", type=int, help="Limit the number of images to process")
     parser.add_argument("--skip-queued", action="store_true", help="Skip already queued images")
