@@ -33,6 +33,16 @@ def execute(account: Account, mode: str):
     files = find_images_in_folders(account, [mode], skip_queued=False, skip_posted=True)
     files = [file for file in files if queued_tag in file]
 
+    # Guard against posting a _Q file when a _P version already exists.
+    def already_posted(f):
+        posted_path = f.replace(queued_tag, posted_tag)
+        if os.path.exists(posted_path):
+            print(f"WARNING: stale queued file detected — posted version already exists, skipping: {f}")
+            return True
+        return False
+
+    files = [f for f in files if not already_posted(f)]
+
     if len(files) == 0:
         err = f"No file found for glob: {account.directory_paths} and extensions {', '.join(account.extensions)}"
         raise ValueError(err)

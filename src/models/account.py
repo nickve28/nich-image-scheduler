@@ -70,6 +70,7 @@ class DeviantPlatformConfig(PlatformConfig):
     gallery_ids: List[str]
     premium_gallery_ids: List[str]
     tags: List[str]
+    display_resolution: Optional[int]
 
     def __init__(self, id, config):
         self.id = id
@@ -81,6 +82,7 @@ class DeviantPlatformConfig(PlatformConfig):
         self.gallery_ids = config.get("gallery_ids", [])
         self.premium_gallery_ids = config.get("premium_gallery_ids", [])
         self.tags = config.get("tags", [])
+        self.display_resolution = config.get("display_resolution", None)
 
 
 PLATFORM_CLASS_BY_NAME = {SupportedPlatforms.DEVIANT: DeviantPlatformConfig, SupportedPlatforms.TWITTER: TwitterPlatformConfig}
@@ -159,6 +161,8 @@ class Account:
             "default_mature_classification", self.deviant_config.default_mature_classification
         )
         self.deviant_config.featured = deviant_sub_config.get("featured", self.deviant_config.featured)
+        if "display_resolution" in deviant_sub_config:
+            self.deviant_config.display_resolution = deviant_sub_config["display_resolution"]
 
     def _update_twitter_config(self, twitter_sub_config: Dict[str, any]):
         self.twitter_config.fixed_tags += twitter_sub_config.get("additional_fixed_tags", [])

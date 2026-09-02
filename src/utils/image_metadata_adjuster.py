@@ -1,3 +1,4 @@
+import os
 import piexif
 import re
 from PIL import Image
@@ -24,12 +25,22 @@ class ImageMetadataAdjuster:
 
     def get_caption(self) -> str:
         exif = self.read_metadata()
-        if piexif.ImageIFD.XPSubject not in exif["0th"]:
-            return ""
-        caption = exif["0th"][piexif.ImageIFD.XPSubject]
-        if isinstance(caption, tuple):
-            caption = "".join(chr(x) for x in caption[::2])
-        return caption
+        if piexif.ImageIFD.XPSubject in exif["0th"]:
+            caption = exif["0th"][piexif.ImageIFD.XPSubject]
+            if isinstance(caption, bytes):
+                caption = caption.decode("utf-16le").rstrip("\x00")
+            elif isinstance(caption, tuple):
+                caption = "".join(chr(x) for x in caption[::2])
+            if caption:
+                return caption
+
+        # Fall back to caption embedded in filename: _[caption]
+        basename = os.path.basename(self.image_path)
+        match = re.search(r'_\[(.+?)\]', basename)
+        if match:
+            return match.group(1)
+
+        return ""
 
     def add_tags(self, tags):
         exif = self.read_metadata()

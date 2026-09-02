@@ -92,3 +92,53 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(result.deviant_config.gallery_ids, ["1", "123"])
         self.assertEqual(result.deviant_config.tags, ["tag1", "tag2", "testtag", "othertesttag"])
         self.assertEqual(result.twitter_config.fixed_tags, ["#extra1", "#extra2", "#extra3"])
+
+    def test_deviant_display_resolution_defaults_to_none(self):
+        test_config = config({"id": "test_account", "deviant": deviant()})
+        result = parse_account(test_config, [])
+        self.assertIsNone(result.deviant_config.display_resolution)
+
+    def test_deviant_display_resolution_can_be_configured(self):
+        test_config = config({"id": "test_account", "deviant": deviant({"display_resolution": 8})})
+        result = parse_account(test_config, [])
+        self.assertEqual(result.deviant_config.display_resolution, 8)
+
+    def test_deviant_display_resolution_can_be_set_to_zero(self):
+        test_config = config({"id": "test_account", "deviant": deviant({"display_resolution": 0})})
+        result = parse_account(test_config, [])
+        self.assertEqual(result.deviant_config.display_resolution, 0)
+
+    def test_sub_config_can_override_display_resolution(self):
+        test_config = config(
+            {
+                "id": "test_account",
+                "deviant": deviant({"display_resolution": 8}),
+                "sub_configs": [
+                    {
+                        "directory_path": "./tests/fixtures/test",
+                        "deviant": {"display_resolution": 0}
+                    }
+                ]
+            }
+        )
+        result = parse_account(test_config, [])
+        result.set_config_for("./tests/fixtures/test/test.jpg")
+        self.assertEqual(result.deviant_config.display_resolution, 0)
+
+    def test_sub_config_can_set_display_resolution_when_not_in_base_config(self):
+        test_config = config(
+            {
+                "id": "test_account",
+                "deviant": deviant(),
+                "sub_configs": [
+                    {
+                        "directory_path": "./tests/fixtures/test",
+                        "deviant": {"display_resolution": 5}
+                    }
+                ]
+            }
+        )
+        result = parse_account(test_config, [])
+        self.assertIsNone(result.deviant_config.display_resolution)
+        result.set_config_for("./tests/fixtures/test/test.jpg")
+        self.assertEqual(result.deviant_config.display_resolution, 5)

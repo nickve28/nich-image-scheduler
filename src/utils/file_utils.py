@@ -82,7 +82,7 @@ def replace_file_tag(filepath: str, old_tag: str, new_tag: str) -> str:
 
     # Rename the file
     os.rename(filepath, new_filepath)
-    print(f"Renamed {filepath} to {new_filepath}")
+    print(f"Renamed {filepath}\n     to {new_filepath}")
     rename_json_if_exists(filepath, new_filepath)
     return new_filepath
 
@@ -109,7 +109,7 @@ def rename_file_with_tags(filepath: str, platform_dict: Dict[str, bool], caption
             new_filename_without_extension = f"{new_filename_without_extension}{queued_tag}"
     new_filepath = os.path.join(directory, f"{new_filename_without_extension}{file_extension}")
     os.rename(filepath, new_filepath)
-    print(f"Renamed {filepath} to {new_filepath}")
+    print(f"Renamed {filepath}\n     to {new_filepath}")
     rename_json_if_exists(filepath, new_filepath)
     return new_filepath
 
@@ -121,7 +121,7 @@ def rename_json_if_exists(filepath: str, new_filepath: str):
 
     if os.path.exists(json_filepath):
         os.rename(json_filepath, new_json_filepath)
-        print(f"Renamed {json_filepath} to {new_json_filepath}")
+        print(f"Renamed {json_filepath}\n     to {new_json_filepath}")
     else:
         print(f"No corresponding JSON file found for {filepath}")
 

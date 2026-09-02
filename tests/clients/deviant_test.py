@@ -116,3 +116,37 @@ class TestDeviantClient(unittest.TestCase):
             expected_gallery_ids = "galleryids%5B%5D=prem123"
             self.assertIn(expected_feature, req_mock.request_history[2].text)
             self.assertIn(expected_gallery_ids, req_mock.request_history[2].text)
+
+    def test_post_image_uses_configured_display_resolution_when_set(self):
+        with requests_mock.Mocker() as req_mock:
+            random_token = str(uuid.uuid4())
+            req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
+            req_mock.post(SUBMIT_URL, json={})
+            loaded_account = account({"deviant": {"display_resolution": 8}})
+            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption", "")
+
+            self.assertIn("display_resolution=8", req_mock.request_history[2].text)
+
+    def test_post_image_uses_configured_display_resolution_zero_for_original(self):
+        with requests_mock.Mocker() as req_mock:
+            random_token = str(uuid.uuid4())
+            req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
+            req_mock.post(SUBMIT_URL, json={})
+            loaded_account = account({"deviant": {"display_resolution": 0}})
+            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption", "")
+
+            self.assertIn("display_resolution=0", req_mock.request_history[2].text)
+
+    def test_post_image_uses_optimal_resolution_when_display_resolution_not_configured(self):
+        with requests_mock.Mocker() as req_mock:
+            random_token = str(uuid.uuid4())
+            req_mock.post(TOKEN_URL, json={"refresh_token": random_token, "access_token": "acc123"})
+            req_mock.post(UPLOAD_URL, json={"itemid": "itemid1"})
+            req_mock.post(SUBMIT_URL, json={})
+            loaded_account = account({})
+            DeviantClient(loaded_account).schedule("tests/fixtures/test.jpg", "some caption", "")
+
+            # test.jpg is a small image, so it should default to 0 (original)
+            self.assertIn("display_resolution=0", req_mock.request_history[2].text)

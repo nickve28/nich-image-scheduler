@@ -172,6 +172,9 @@ class DeviantClient:
             # {'status': 'success', 'itemid': ---, 'stack': 'Sta.sh Uploads 90', 'stackid': ---}
             can_be_featured = self.account.deviant_config.featured and len(config.premium_gallery_ids) == 0
 
+            # Use configured display_resolution if set, otherwise calculate optimal
+            display_resolution = config.display_resolution if config.display_resolution is not None else get_optimal_resolution(image_path)
+
             publish_data = {
                 "itemid": json["itemid"],
                 "title": truncate_caption(caption),
@@ -180,7 +183,7 @@ class DeviantClient:
                 "is_ai_generated": "true",
                 "noai": "false",
                 "allow_free_download": "false",
-                "display_resolution": get_optimal_resolution(image_path),
+                "display_resolution": display_resolution,
                 "feature": "true" if can_be_featured else "false",
                 "galleryids[]": self._get_gallery_ids(),
                 # "mature_classification": DEVI_MATURE_CLASSIFICATION,

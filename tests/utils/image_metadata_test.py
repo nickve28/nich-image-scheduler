@@ -92,3 +92,34 @@ class TestImageMetadataAdjuster(unittest.TestCase):
         adjuster.save()
 
         self.assertEqual(adjuster.get_content_tags(), "hello_world_, invalid_chars_here")
+
+    def test_get_caption_from_exif(self):
+        adjuster = ImageMetadataAdjuster(self.test_image_path)
+        adjuster.add_subject("My Caption")
+        adjuster.save()
+        self.assertEqual(adjuster.get_caption(), "My Caption")
+
+    def test_get_caption_fallback_from_filename(self):
+        # Image with no EXIF caption but caption in filename
+        path = "image_[Armor Embrace II]_DEVI_Q.jpg"
+        create_test_image(path)
+        try:
+            adjuster = ImageMetadataAdjuster(path)
+            self.assertEqual(adjuster.get_caption(), "Armor Embrace II")
+        finally:
+            os.remove(path)
+
+    def test_get_caption_exif_takes_priority_over_filename(self):
+        path = "image_[Filename Caption]_DEVI_Q.jpg"
+        create_test_image(path)
+        try:
+            adjuster = ImageMetadataAdjuster(path)
+            adjuster.add_subject("EXIF Caption")
+            adjuster.save()
+            self.assertEqual(adjuster.get_caption(), "EXIF Caption")
+        finally:
+            os.remove(path)
+
+    def test_get_caption_empty_when_no_caption(self):
+        adjuster = ImageMetadataAdjuster(self.test_image_path)
+        self.assertEqual(adjuster.get_caption(), "")
